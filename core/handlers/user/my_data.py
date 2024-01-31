@@ -2,8 +2,8 @@ from aiogram import Bot, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from core.handlers.basic import main_page
-from core.keyboards.inline import get_back_inline_keyboard
+from core.handlers.basic import get_start
+from core.keyboards.reply import (get_back_reply_keyboard)
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.utils.RestHandler import RestHandler
 from core.utils.states import States
@@ -11,27 +11,23 @@ from core.utils.states import States
 router = Router()
 
 
-@router.callback_query(lambda m: m.data == 'my-data')
-async def get_my_data(call: CallbackQuery, chat_handler: ChatHistoryHandler, state: FSMContext, rest: RestHandler):
-    await chat_handler.delete_messages(call.message.chat.id)
-    # user = await rest.get(url=f'user\\{message.from_user.id}')
-    user = {
-        "id": call.message.from_user.id,
-        "bonus": 1000,
-        'name': call.message.from_user.full_name,
-        'date': '2023-01-13'
-    }
-    await chat_handler.send_message(call.message, f'👤 *Мои данные:*\n\n'
-                                                  f'ID: {user["id"]}\n'
-                                                  f'Имя: {user["name"]}\n'
-                                                  f'Кол-во бонусов: {user["bonus"]}\n\n'
-                                                  f'Дата регистраций: {user["date"]}',
-                                    reply_markup=get_back_inline_keyboard())
-    await call.answer()
+@router.message(lambda m: m.text == '👤 Мои данные')
+async def get_my_data(message: Message, chat_handler: ChatHistoryHandler, state: FSMContext):
+    context = await state.get_data()
+    user = context.get('user')
+
+    await chat_handler.delete_messages(message.chat.id)
+    await chat_handler.send_message(message, f'👤 *Мои данные:*\n\n'
+                                             f'ID: {user["telegram_id"]}\n'
+                                             f'Имя: {user["telegram_fullname"]}\n'
+                                             f'Кол-во бонусов: {user["bonus"]}\n\n'
+                                             f'Дата регистраций: {user["created_at"]}',
+                                    reply_markup=get_back_reply_keyboard())
     await state.set_state(States.MY_DATA)
 
 
-@router.callback_query(States.MY_DATA, lambda m: m.data == 'to-back')
-async def go_back(call: CallbackQuery, chat_handler: ChatHistoryHandler, rest: RestHandler):
-    await chat_handler.delete_messages(call.message.chat.id)
-    await main_page(call.message, chat_handler, rest)
+@router.message(States.MY_DATA, lambda m: m.text == '🔙 На главную')
+async def go_back(message: Message, chat_handler: ChatHistoryHandler, rest: RestHandler, state: FSMContext):
+    await state.set_state(None)
+    await chat_handler.delete_messages(message.chat.id)
+    await get_start(message, chat_handler, rest, state)

@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
+from aiogram.utils.chat_action import ChatActionMiddleware
 
 from core.handlers import user, basic
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
@@ -26,6 +27,7 @@ async def main():
     dp.callback_query.middleware.register(rest_middleware)
     dp.message.middleware.register(delete_middleware)
     dp.message.middleware.register(rest_middleware)
+    dp.message.middleware.register(ChatActionMiddleware())
 
     dp.include_routers(user.router, basic.router)
 
@@ -37,3 +39,15 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+
+
+
+    # # Example coordinates
+    # latitude = 43.242977  # Example latitude
+    # longitude = 76.945621  # Example longitude
+    #
+    # # Convert coordinates to address
+    # address = get_address(latitude, longitude)
+    # print("Address:", address)
