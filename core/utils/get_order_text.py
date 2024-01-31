@@ -13,6 +13,9 @@ async def get_order_text(state: FSMContext) -> str:
     name = context.get('name')
     phone = context.get('phone')
     geo: dict = context.get('geo')
+    print(geo)
+    if geo is not None:
+        print(geo.get('lat'), geo.get('loc'))
     exact_geo = context.get('exact_geo')
     pay_bonus = context.get('pay_bonus')
     order: dict = json.loads(context.get('order'))

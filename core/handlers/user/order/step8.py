@@ -39,6 +39,8 @@ async def main_logic(message: Message, state: FSMContext, chat_handler: ChatHist
     # else:
     await chat_handler.delete_messages(message.chat.id)
     await chat_handler.send_message(message, 'Заказ сохранен')
+    await state.set_state(None)
+    await get_start(message, chat_handler, rest, state, delete_previous_messages=False)
     # Надо удалить и другие данные
 
 

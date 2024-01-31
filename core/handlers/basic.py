@@ -24,7 +24,8 @@ async def _get_start(message: Message, command: CommandObject, chat_handler: Cha
 
 
 async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: RestHandler,
-                    state: FSMContext, command: CommandObject | None = None) -> None:
+                    state: FSMContext, command: CommandObject | None = None, delete_previous_messages: bool = True) \
+        -> None:
     try:
         if command is None:
             payload = {
@@ -55,7 +56,8 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         await state.update_data(user=user)
         context = await state.get_data()
         order = context.get("order")
-        await chat_handler.delete_messages(message.chat.id)
+        if delete_previous_messages:
+            await chat_handler.delete_messages(message.chat.id)
         await chat_handler.send_message(message,
                                         f"👋🏻 *Добро пожаловать в пиццерию "
                                         f"{'' if user['telegram_fullname'] is None else user['telegram_fullname']}!*\n"

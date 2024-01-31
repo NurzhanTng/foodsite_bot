@@ -7,6 +7,7 @@ from core.handlers import user, basic
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
 from core.middlewares.RestMiddleware import RestMiddleware
 from core.settings import settings
+from core.utils.get_address import get_address
 from core.utils.set_commands import set_commands
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -39,15 +40,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-
-
-    # # Example coordinates
-    # latitude = 43.242977  # Example latitude
-    # longitude = 76.945621  # Example longitude
-    #
-    # # Convert coordinates to address
-    # address = get_address(latitude, longitude)
-    # print("Address:", address)
+    # print(get_address(43.242977, 76.945621))

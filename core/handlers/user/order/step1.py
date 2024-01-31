@@ -22,7 +22,7 @@ async def main_logic(message: Message, state: FSMContext, chat_handler: ChatHist
     await state.set_state(States.ORDER_IS_DELIVERY)
 
 
-@router.message(F.web_app_data)
+@router.message(WithoutStateFilter(), F.web_app_data)
 async def show_menu(message: Message, state: FSMContext, chat_handler: ChatHistoryHandler):
     await state.update_data(order=message.web_app_data.data)
     await main_logic(message, state, chat_handler)
