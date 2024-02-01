@@ -6,15 +6,17 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+core/keyboards/__pycache__
 node_modules
 dist
 .venv
-.env
+core/__pycache__
+core/filters/__pycache__
+core/handlers/user/__pycache__
 venv
 dist-ssr
 *.local
-
+ core/handlers/__pycache__
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +27,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+core/middlewares/__pycache__
