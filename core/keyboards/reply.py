@@ -30,7 +30,26 @@ def get_main_reply_keyboard(order: dict | None):
     return keyboard_builder.as_markup(
         input_field_placeholder='Выберите действие',
         resize_keyboard=True,
-        one_time_keyboard=True
+    )
+
+
+def get_manager_reply_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+
+    keyboard_builder.button(text='Создать тестовый заказ', callback_data='contact')
+    keyboard_builder.button(text='❗ Новые заказы', callback_data='contact')
+    keyboard_builder.button(text='Ожидающие оплаты заказы', callback_data='contact')
+    keyboard_builder.button(text='Активные заказы', callback_data='contact')
+    keyboard_builder.button(text='Готовые заказы', callback_data='contact')
+    keyboard_builder.button(text='Ожидающие доставки заказы', callback_data='contact')
+    keyboard_builder.button(text='Выполненные заказы', callback_data='contact')
+
+    keyboard_builder.adjust(1, 1, 2, 2, 1)
+
+    return keyboard_builder.as_markup(
+        input_field_placeholder='Выберите действие',
+        resize_keyboard=True,
+        one_time_keyboard=False
     )
 
 
@@ -41,7 +60,7 @@ def get_back_reply_keyboard():
     return keyboard_builder.as_markup(
         input_field_placeholder='⏬ Нажмите кнопку, чтобы перейти на главную страницу',
         resize_keyboard=True,
-        one_time_keyboard=True
+        # one_time_keyboard=True
     )
 
 
@@ -80,7 +99,7 @@ def order_reply_keyboard(order: dict | None, placeholder: str, additional_button
     return keyboard_builder.as_markup(
         input_field_placeholder=placeholder,
         resize_keyboard=True,
-        one_time_keyboard=True
+        # one_time_keyboard=True
     )
 
 
@@ -129,3 +148,5 @@ def get_kaspi_phone_reply_keyboard(order: dict | None, user: dict):
     return order_reply_keyboard(order,
                                 placeholder='Выберите прошлый номер каспи или впишите вручную',
                                 additional_buttons={'': user['phone'], 'contact': 'Отправить свой номер'})
+
+

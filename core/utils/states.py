@@ -13,3 +13,6 @@ class States(StatesGroup):
     ORDER_PAY_BONUS = State()
     ORDER_ACCEPT = State()
 
+    ORDER_SHOW = State()
+    ORDER_STATUS_CHANGE = State()
+

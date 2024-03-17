@@ -1,5 +1,6 @@
-from .user import main as user
+import core.handlers.user
+import core.handlers.manager
 
 __all__ = [
-    "user"
+    "user", "manager"
 ]

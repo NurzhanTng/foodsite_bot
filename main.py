@@ -1,13 +1,14 @@
 import asyncio
+import json
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.utils.chat_action import ChatActionMiddleware
 
-from core.handlers import user, basic
+from core.handlers import manager, user, basic
+from core.middlewares.TestManagerMiddleware import TestManagerMiddleware
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
 from core.middlewares.RestMiddleware import RestMiddleware
 from core.settings import settings
-from core.utils.get_address import get_address
 from core.utils.set_commands import set_commands
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -24,13 +25,16 @@ async def main():
 
     delete_middleware = DeleteMessagesMiddleware(bot)
     rest_middleware = RestMiddleware(bot)
+    test_manager_middleware = TestManagerMiddleware()
     dp.callback_query.middleware.register(delete_middleware)
     dp.callback_query.middleware.register(rest_middleware)
+    dp.callback_query.middleware.register(test_manager_middleware)
     dp.message.middleware.register(delete_middleware)
     dp.message.middleware.register(rest_middleware)
+    dp.message.middleware.register(test_manager_middleware)
     dp.message.middleware.register(ChatActionMiddleware())
 
-    dp.include_routers(user.router, basic.router)
+    dp.include_routers(manager.router, user.router, basic.router)
 
     try:
         await dp.start_polling(bot)
@@ -40,4 +44,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    # print(get_address(43.242977, 76.945621))
