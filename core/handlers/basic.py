@@ -37,11 +37,8 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             'promo': promo
         }
 
-        context = await state.get_data()
-        user = context.get("user")
-        if user is None:
-            user = await rest.post(url=f'auth/register/', data=payload)
-            await state.update_data(user=user)
+        user = await rest.post(url=f'auth/register/', data=payload)
+        await state.update_data(user=user)
             
         if user["role"] == "manager":
             await chat_handler.send_message(message,
