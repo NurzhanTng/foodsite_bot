@@ -19,7 +19,7 @@ router = Router()
 @router.message(Command(commands=['start', 'run']))
 async def _get_start(message: Message, command: CommandObject, chat_handler: ChatHistoryHandler, rest: RestHandler,
                      state: FSMContext):
-    # await message.answer('Верхний текст для показа пользователям. Он нужен, чтобы в некоторых телефонах не вылетало')
+    await message.answer('Добро пожаловать в Restobar')
     await get_start(message, chat_handler, rest, state, command)
 
 
@@ -40,20 +40,20 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         context = await state.get_data()
         user = context.get("user")
         if user is None:
-            user = await rest.post(url=f'/auth/register/', data=payload)
+            user = await rest.post(url=f'auth/register/', data=payload)
             await state.update_data(user=user)
             
         if user["role"] == "manager":
             await chat_handler.send_message(message,
-                                            f"👋🏻 *Добро пожаловать на главную страницу менеджера*"
+                                            f"*Вы находитесь на главной странице менеджера*\n"
                                             f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
                                             reply_markup=get_manager_inline_keyboard())
 
         if user["role"] == "client":
             await chat_handler.send_message(message,
-                                            f"👋🏻 *Добро пожаловать в пиццерию "
+                                            f"*Вы находитесь на главной странице*"
                                             f"{'' if user['telegram_fullname'] is None else user['telegram_fullname']}"
-                                            f"!*\n*В данный момент у вас:* {user['bonus']} бонусов!\n" +
+                                            f"!\n*В данный момент у вас:* {user['bonus']} бонусов!\n" +
                                             f"_При оформление заказа, вы сможете потратить эти бонусы_\n" +
                                             f"_Чтобы сделать предзаказ, воспользуйтесь кнопками._",
                                             reply_markup=get_main_inline_keyboard())

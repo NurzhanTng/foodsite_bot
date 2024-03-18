@@ -17,7 +17,7 @@ router = Router()
 
 @router.callback_query(F.data == 'old-orders')
 async def get_my_data(callback: CallbackQuery, chat_handler: ChatHistoryHandler, state: FSMContext, rest: RestHandler):
-    orders_dict = await rest.get(url=f'/food/orders/')
+    orders_dict = await rest.get(url=f'food/orders/')
     orders: List[Order] = []
     for order in orders_dict:
         orders.append(OrderSerializer.from_dict(order))
