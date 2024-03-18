@@ -1,9 +1,10 @@
 from aiogram import Bot, Router, F
+from aiogram.filters import CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from core.handlers.basic import get_start
-from core.keyboards.reply import get_back_reply_keyboard
+from core.keyboards.inline import get_back_inline_keyboard
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.utils.RestHandler import RestHandler
 from core.utils.states import States
@@ -11,20 +12,28 @@ from core.utils.states import States
 router = Router()
 
 
-@router.message(lambda m: m.text == '📞 Контакты')
-async def get_my_data(message: Message, chat_handler: ChatHistoryHandler, state: FSMContext):
-    await chat_handler.delete_messages(message.chat.id)
-    await chat_handler.send_message(message,
+@router.callback_query(F.data == 'contact')
+async def get_my_data(callback: CallbackQuery, chat_handler: ChatHistoryHandler, state: FSMContext):
+    await chat_handler.delete_messages(callback.message.chat.id)
+    await state.set_state(States.CONTACTS)
+    await chat_handler.send_message(callback.message,
                                     f'*🍕 Pizzeria*\n'
                                     f'Наши контакты: +77715518120\n'
                                     f'Инстаграм: [pizzeria_ala](https://instagram.com/pizzeria_ala)\n'
                                     f'Адрес: Алматы, улица Курмангазы, 54',
-                                    reply_markup=get_back_reply_keyboard())
-    await state.set_state(States.CONTACTS)
+                                    reply_markup=get_back_inline_keyboard())
 
 
-@router.message(States.CONTACTS, lambda m: m.text == '🔙 На главную')
-async def go_back(message: Message, chat_handler: ChatHistoryHandler, rest: RestHandler, state: FSMContext):
-    await state.set_state(None)
-    await chat_handler.delete_messages(message.chat.id)
-    await get_start(message, chat_handler, rest, state)
+@router.callback_query(States.CONTACTS, F.data == 'to-back')
+async def go_back(callback: CallbackQuery, chat_handler: ChatHistoryHandler, rest: RestHandler, state: FSMContext,
+                  command: CommandObject | None = None):
+    await chat_handler.delete_messages(callback.message.chat.id)
+    await get_start(callback.message, chat_handler, rest, state, command)
+
+#
+# @router.callback_query(F.data)
+# async def go_back(callback: CallbackQuery, chat_handler: ChatHistoryHandler, rest: RestHandler, state: FSMContext,
+#                   command: CommandObject | None = None):
+#     await chat_handler.delete_messages(callback.message.chat.id)
+#     await chat_handler.send_message(callback.message,
+#                                     f'Пришел колбек: {callback.data}')

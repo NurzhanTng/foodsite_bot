@@ -3,7 +3,7 @@ from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from core.keyboards.inline import get_main_reply_keyboard
+from core.keyboards.inline import get_main_inline_keyboard, get_manager_inline_keyboard
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.utils.RestHandler import RestHandler
 from core.filters.without_state_filter import WithoutStateFilter
@@ -27,18 +27,15 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
                     state: FSMContext, command: CommandObject | None = None, delete_previous_messages: bool = True) \
         -> None:
     try:
-        if command is None:
-            payload = {
-                'telegram_id': message.chat.id,
-                'telegram_fullname': message.from_user.full_name,
-                'promo': '',
-            }
-        else:
-            payload = {
-                'telegram_id': message.chat.id,
-                'telegram_fullname': message.from_user.full_name,
-                'promo': '' if command.args is None else command.args,
-            }
+        promo = ""
+        if command is not None:
+            promo = command.args
+
+        payload = {
+            'telegram_id': message.chat.id,
+            'telegram_fullname': message.from_user.full_name,
+            'promo': promo
+        }
 
         context = await state.get_data()
         user = context.get("user")
@@ -48,7 +45,9 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             
         if user["role"] == "manager":
             await chat_handler.send_message(message,
-                                            f"👋🏻 *Добро пожаловать на главную страницу менеджера*")
+                                            f"👋🏻 *Добро пожаловать на главную страницу менеджера*"
+                                            f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
+                                            reply_markup=get_manager_inline_keyboard())
 
         if user["role"] == "client":
             await chat_handler.send_message(message,
@@ -57,7 +56,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
                                             f"!*\n*В данный момент у вас:* {user['bonus']} бонусов!\n" +
                                             f"_При оформление заказа, вы сможете потратить эти бонусы_\n" +
                                             f"_Чтобы сделать предзаказ, воспользуйтесь кнопками._",
-                                            reply_markup=get_main_reply_keyboard())
+                                            reply_markup=get_main_inline_keyboard())
     except Exception as e:
         print(e)
 

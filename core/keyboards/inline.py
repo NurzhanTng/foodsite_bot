@@ -16,21 +16,45 @@ def get_web_url(order: str = None, path: str = '') -> str:
     return web_url
 
 
-def get_main_reply_keyboard():
+def get_main_inline_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
 
-    # keyboard_builder.button(text='Проверка оформления заказа', callback_data='test')
+    keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
     # keyboard_builder.button(text='🛒 Корзина', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz/cart"))
     # keyboard_builder.button(text='🚖 Активные заказы', callback_data='show-cart')
     # keyboard_builder.button(text='🗃 История заказов', callback_data='show-history')
-    keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
     keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
+    keyboard_builder.button(text='🗃 История заказов', callback_data='old-orders')
     keyboard_builder.button(text='📞 Контакты', callback_data='contact')
     keyboard_builder.adjust(1, 1, 1)
 
     return keyboard_builder.as_markup(
         input_field_placeholder='Выберите действие',
         resize_keyboard=True,
+    )
+
+
+def get_manager_inline_keyboard():
+    keyboard_builder = InlineKeyboardBuilder()
+
+    keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
+    keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
+    keyboard_builder.adjust(1, 1, 1)
+
+    return keyboard_builder.as_markup(
+        input_field_placeholder='Выберите действие',
+        resize_keyboard=True,
+    )
+
+
+def get_back_inline_keyboard():
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.button(text='🔙 На главную', callback_data='to-back')
+
+    return keyboard_builder.as_markup(
+        input_field_placeholder='⏬ Нажмите кнопку, чтобы перейти на главную страницу',
+        resize_keyboard=True,
+        # one_time_keyboard=True
     )
 
 
@@ -73,8 +97,3 @@ def get_change_order_type_inline_keyboard(order: Order):
         resize_keyboard=True
     )
 
-
-def get_back_inline_keyboard():
-    keyboard_builder = InlineKeyboardBuilder()
-    keyboard_builder.button(text='Назад', callback_data='back')
-    return keyboard_builder.as_markup(resize_keyboard=True)
