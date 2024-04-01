@@ -3,7 +3,7 @@ from aiogram.types import Message
 
 
 class ChatHistoryHandler:
-    def __init__(self, bot:Bot) -> None:
+    def __init__(self, bot: Bot) -> None:
         self.bot = bot
         self.messages = {}
 

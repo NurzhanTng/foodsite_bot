@@ -1,4 +1,4 @@
-from core.Models.Product import Product, ProductSerializer
+from core.models.Product import Product, ProductSerializer
 from dataclasses import dataclass, field
 from typing import List, Dict, Any
 
@@ -50,11 +50,14 @@ class Order:
     products: List[OrderProduct]
     client_id: int
     bonus_used: int
+    bonus_amount: int
     user_name: str
     address: dict
     company_id: int
     exact_address: str
+    delivery_price: int
     phone: str
+    kaspi_phone: str
     client_comment: str
     actions: List[dict]
 
@@ -69,12 +72,15 @@ class OrderSerializer:
             "products": [OrderProductSerializer.to_dict(product) for product in order.products],
             "client_id": order.client_id,
             "bonus_used": order.bonus_used,
+            "bonus_amount": order.bonus_amount,
             "user_name": order.user_name,
             "address": order.address,
             "company_id": order.company_id,
             "exact_address": order.exact_address,
             "phone": order.phone,
+            "kaspi_phone": order.kaspi_phone,
             "client_comment": order.client_comment,
+            "delivery_price": order.delivery_price,
             "actions": order.actions
         }
 
@@ -88,11 +94,14 @@ class OrderSerializer:
             products=products,
             client_id=data['client_id'],
             bonus_used=data['bonus_used'],
+            bonus_amount=data["bonus_amount"],
             user_name=data['user_name'],
             address=data['address'],
+            delivery_price=data['delivery_price'],
             company_id=data['company_id'],
             exact_address=data['exact_address'],
             phone=data['phone'],
+            kaspi_phone=data['kaspi_phone'],
             client_comment=data['client_comment'],
             actions=data['actions']
         )
