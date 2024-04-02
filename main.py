@@ -11,7 +11,7 @@ from core.middlewares.RestMiddleware import RestMiddleware
 from core.settings import settings
 from core.utils.set_commands import set_commands
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+#asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 async def main():
