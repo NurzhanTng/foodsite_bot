@@ -19,7 +19,9 @@ router = Router()
 @router.message(Command(commands=['start', 'run']))
 async def _get_start(message: Message, command: CommandObject, chat_handler: ChatHistoryHandler, rest: RestHandler,
                      state: FSMContext):
-    await message.answer('Добро пожаловать в Restobar')
+    await message.answer('Добро пожаловать в нашего телеграм бота для заказа еды 🎉\n\n'
+                         'Бот предлагает удобное меню, заказы и отслеживание статуса. \n'
+                         'Получайте уведомления об акциях и бонусах в боте!')
     await get_start(message, chat_handler, rest, state, command)
 
 
@@ -48,7 +50,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
 
         if user["role"] == "client":
             await chat_handler.send_message(message,
-                                            f"*Вы находитесь на главной странице*"
+                                            f"*Вы находитесь на главной странице* "
                                             f"{'' if user['telegram_fullname'] is None else user['telegram_fullname']}"
                                             f"!\n*В данный момент у вас:* {user['bonus']} бонусов!\n" +
                                             f"_При оформление заказа, вы сможете потратить эти бонусы_\n" +

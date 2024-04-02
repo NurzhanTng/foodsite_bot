@@ -5,7 +5,7 @@ from aiogram.filters import CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from core.Models.Order import OrderSerializer, Order
+from core.models.Order import OrderSerializer, Order
 from core.handlers.basic import get_start
 from core.keyboards.inline import get_back_inline_keyboard
 from core.utils.ChatHistoryHandler import ChatHistoryHandler

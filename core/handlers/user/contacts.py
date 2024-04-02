@@ -17,10 +17,10 @@ async def get_my_data(callback: CallbackQuery, chat_handler: ChatHistoryHandler,
     await chat_handler.delete_messages(callback.message.chat.id)
     await state.set_state(States.CONTACTS)
     await chat_handler.send_message(callback.message,
-                                    f'*🍕 Pizzeria*\n'
+                                    f'🍜 *Рестопарк*\n'
                                     f'Наши контакты: +77715518120\n'
-                                    f'Инстаграм: [pizzeria_ala](https://instagram.com/pizzeria_ala)\n'
-                                    f'Адрес: Алматы, улица Курмангазы, 54',
+                                    f'Инстаграм: [restopark.almaty](https://www.instagram.com/restopark.almaty/?hl=ru)'
+                                    f'\nАдрес: г.Алматы. ТРК Forum. Проспект Сейфуллина, 617 / 3 этаж',
                                     reply_markup=get_back_inline_keyboard())
 
 

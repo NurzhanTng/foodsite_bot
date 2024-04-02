@@ -8,7 +8,6 @@ from aiogram.types.web_app_info import WebAppInfo
 from core.utils.OrderTest import Order
 
 
-
 def get_web_url(order: str = None, path: str = '') -> str:
     web_url = 'https://www.pizzeria-almaty.kz' + path
     if order is not None:
@@ -21,12 +20,14 @@ def get_main_inline_keyboard():
 
     keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
     # keyboard_builder.button(text='🛒 Корзина', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz/cart"))
-    # keyboard_builder.button(text='🚖 Активные заказы', callback_data='show-cart')
     # keyboard_builder.button(text='🗃 История заказов', callback_data='show-history')
+    keyboard_builder.button(text='🚖 Активные заказы', web_app=WebAppInfo(
+        url='https://www.pizzeria-almaty.kz/active_orders'))
+    keyboard_builder.button(text='🗃 История заказов', web_app=WebAppInfo(
+        url='https://www.pizzeria-almaty.kz/history_orders'))
     keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
-    keyboard_builder.button(text='🗃 История заказов', callback_data='old-orders')
     keyboard_builder.button(text='📞 Контакты', callback_data='contact')
-    keyboard_builder.adjust(1, 1, 1)
+    keyboard_builder.adjust(1, 2, 2)
 
     return keyboard_builder.as_markup(
         input_field_placeholder='Выберите действие',
@@ -37,7 +38,7 @@ def get_main_inline_keyboard():
 def get_manager_inline_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
 
-    keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
+    keyboard_builder.button(text='📋 Заказы', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
     keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
     keyboard_builder.adjust(1, 1, 1)
 
@@ -82,7 +83,7 @@ def get_change_order_type_inline_keyboard(order: Order):
         'payment_await': 'Нажмите после получения оплаты заказа',
         'active': 'Нажмите после готовности заказа',
         'done': 'Нажмите после получение заказа клиентом' if order.is_delivery
-                else 'Нажмите после передачи заказа доставщику',
+        else 'Нажмите после передачи заказа доставщику',
         'on_delivery': 'Нажмите после получение заказа клиентом',
         'inactive': ''
     }
@@ -96,4 +97,3 @@ def get_change_order_type_inline_keyboard(order: Order):
     return keyboard_builder.as_markup(
         resize_keyboard=True
     )
-

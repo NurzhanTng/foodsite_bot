@@ -1,4 +1,6 @@
-aiogram==3.3.0
-environs==10.0.0
-aiohttp==3.9.3
+aiogram
+environs
+aiohttp
 geopy==2.4.1
+websockets
+apscheduler
