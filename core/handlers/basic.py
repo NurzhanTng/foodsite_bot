@@ -60,7 +60,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         print(e)
 
 
-@router.message(WithoutStateFilter(), lambda message: not message.web_app_data)
-async def handle_all_messages(message: Message):
-    print('Заглушка')
+@router.message(lambda message: not message.web_app_data)
+async def handle_all_messages(message: Message, bot: Bot):
+    await bot.delete_message(message.chat.id, message.message_id)
     ...
