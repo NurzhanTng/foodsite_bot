@@ -15,9 +15,7 @@ from core.settings import settings
 from core.utils.set_commands import set_commands
 from core.utils.OrderSender import OrderSender
 
-<<<<<<< HEAD
-#asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-=======
+
 try:
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 except RuntimeError:
@@ -45,7 +43,7 @@ async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler):
 #             message = await websocket.recv()
 #             # Отправляем полученное сообщение в Telegram
 #             await send_telegram_message(bot, message)
->>>>>>> c7d48f6a45f4380d2a29fb183245f168be1bdf8f
+
 
 
 async def main():
