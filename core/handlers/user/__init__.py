@@ -1,6 +1,6 @@
 from aiogram import Router
 
-from core.handlers.user import my_data, contacts, orders
+from core.handlers.user import my_data, contacts, orders, rating
 from core.filters import UserRoleFilter
 
 router = Router()

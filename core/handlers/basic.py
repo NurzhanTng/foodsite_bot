@@ -11,11 +11,6 @@ from core.filters.without_state_filter import WithoutStateFilter
 router = Router()
 
 
-# @router.startup()
-# async def start_bot(bot: Bot):
-#     await bot.send_message(settings.bots.admin_id, text="Бот запущен!")
-
-
 @router.message(Command(commands=['start', 'run']))
 async def _get_start(message: Message, command: CommandObject, chat_handler: ChatHistoryHandler, rest: RestHandler,
                      state: FSMContext):
@@ -60,7 +55,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         print(e)
 
 
-@router.message(WithoutStateFilter(), lambda message: not message.web_app_data)
-async def handle_all_messages(message: Message):
-    print('Заглушка')
-    ...
+# @router.message(lambda message: not message.web_app_data)
+# async def handle_all_messages(message: Message, bot: Bot):
+#     await bot.delete_message(message.chat.id, message.message_id)
+#     ...
