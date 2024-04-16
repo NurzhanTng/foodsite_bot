@@ -97,3 +97,18 @@ def get_change_order_type_inline_keyboard(order: Order):
     return keyboard_builder.as_markup(
         resize_keyboard=True
     )
+
+
+def get_rating_inline_keyboard():
+    keyboard_builder = InlineKeyboardBuilder()
+
+    keyboard_builder.button(text="😞", callback_data='rating-0')
+    keyboard_builder.button(text="😐", callback_data='rating-1')
+    keyboard_builder.button(text="🙂", callback_data='rating-2')
+    keyboard_builder.button(text="😊", callback_data='rating-3')
+
+    keyboard_builder.adjust(4)
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True
+    )

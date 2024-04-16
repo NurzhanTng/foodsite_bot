@@ -1,20 +1,25 @@
-from aiogram import Bot
+from aiogram import Bot, Router, F
 import time
+import json
 import logging
+from aiogram.filters import (Command, CommandObject, )
+from aiogram.types import Message, LabeledPrice, PreCheckoutQuery, ContentType
 
+from core.settings import settings
 from core.utils.RestHandler import RestHandler
 from core.models.Order import Order, OrderSerializer
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
+from core.keyboards.inline import get_rating_inline_keyboard
 
 
 class OrderSender:
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot, message_history):
         self.orders: list[Order] = []
         self.manager_id: int = 0
         self.rest = RestHandler(bot)
         self.bot: Bot = bot
         self.serializer = OrderSerializer()
-        self.message_history = ChatHistoryHandler(bot)
+        self.message_history = message_history
 
     async def update_settings(self):
         # logging.info("[update_settings] started")
@@ -38,21 +43,45 @@ class OrderSender:
         return -1
 
     async def send_new_order(self, order: Order):
-        client_text = f"Ваш заказ сохранен\nБлюда в заказе:\n"
-        price = 0
-        for product in order.products:
-            price += product.price
-            client_text += f'{product.product.name} - {product.amount} шт | {product.price} тенге\n'
-        if order.bonus_used:
-            client_text += f'\nОбщая стоимость: {price - order.bonus_amount}'
-        else:
-            client_text += f'\nОбщая стоимость: {price}'
+        print('Order: ', self.serializer.to_dict(order))
+        prices = [LabeledPrice(label=f"{product.product.name}, {product.active_modifier}", amount=product.price * 100)
+                  for
+                  product in
+                  order.products]
 
-        message_id = (await self.bot.send_message(order.client_id, client_text)).message_id
+        if order.bonus_used:
+            prices.append(LabeledPrice(label="Использованный бонус", amount=-100 * order.bonus_amount))
+        # if not (order.exact_address is None or order.exact_address == ""):
+        #     prices.append(LabeledPrice(label="Доставка", amount=int(order.delivery_price) * 100))
+
+        message_id = (await self.bot.send_message(order.client_id, f"Ваш заказ сохранен\n")).message_id
+        invoice_id = (
+            await self.bot.send_invoice(
+                order.client_id,
+                title="Оплата заказа",
+                photo_url="https://www.aroged.com/wp-content/uploads/2022/06/Telegram-has-a-premium-subscription.jpg",
+                photo_width=416,
+                photo_height=234,
+                photo_size=416,
+                description="Оплата заказа через карту",
+                provider_token=settings.bots.payments_token,
+                currency="kzt",
+                is_flexible=False,
+                prices=prices,
+                start_parameter="order-payment",
+                payload="TEST"
+            )
+        ).message_id
+
         self.message_history.add_new_message(order.client_id, message_id)
+        self.message_history.add_new_message(order.client_id, invoice_id)
         await self.bot.send_message(1234249296, f"Получен новый заказ {order.id}")
 
     async def send_new_status(self, order: Order):
+        order_price = 0
+        for product in order.products:
+            order_price += product.price
+
         text_by_status = {
             'manager_await': 'Ваш заказ находится в обработке нашим менеджером. Благодарим за ожидание и понимание!',
             'payment_await': 'Благодарим за ваш заказ! Вам отправлен платеж на каспи. После '
@@ -61,8 +90,10 @@ class OrderSender:
             'done': 'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: г.Алматы. ТРК Forum. Проспект '
                     'Сейфуллина, 617 / 3 этаж',
             'on_delivery': 'Ваш заказ готов и передан доставщику. Ожидайте доставки в ближайшее время',
-            'inactive': 'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено 2000 бонусных '
-                        'баллов'
+            'inactive': f'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено '
+                        f'{(order_price - order.bonus_amount + order.delivery_price) // 20} бонусных баллов',
+            'rating': "Пожалуйста, выберите смайлик, который наилучшим образом описывает ваше впечатление от "
+                      "заказа:\n\n😞 - Не понравилось\n😐 - Средне\n🙂 - Хорошо\n😊 - Отлично",
         }
         # 'Ваш заказ готов. Можете забрать его в выбранной точке' if order.is_delivery else 'Ваш заказ готов. Скоро
         # он будет передан курьеру',
@@ -72,9 +103,13 @@ class OrderSender:
                 await self.message_history.delete_messages(order.client_id)
             message_id = (await self.bot.send_message(order.client_id, text_by_status[order.status])).message_id
             self.message_history.add_new_message(order.client_id, message_id)
+            rating_id = (await self.bot.send_message(order.client_id, text_by_status['rating'],
+                                                     reply_markup=get_rating_inline_keyboard())).message_id
             if order.status == "inactive":
                 await asyncio.sleep(10)
                 await self.message_history.delete_messages(order.client_id)
+                self.message_history.add_new_message(order.client_id, rating_id)
+
         except Exception as e:
             print(e)
 
