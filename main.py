@@ -17,10 +17,10 @@ from core.utils.set_commands import set_commands
 from core.utils.OrderSender import OrderSender
 
 
-try:
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-except RuntimeError:
-    print("Can't set event loop policy")
+#try:
+#    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+#except RuntimeError:
+#    print("Can't set event loop policy")
 
 
 async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_middleware: DeleteMessagesMiddleware):
