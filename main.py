@@ -7,7 +7,7 @@ from aiogram.utils.chat_action import ChatActionMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from core.handlers import manager, user, basic
-from core.handlers.user import  rating
+from core.handlers.user import rating
 from core.middlewares.TestManagerMiddleware import TestManagerMiddleware
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
 from core.middlewares.AppShedulerMiddleware import SchedulerMiddleware
@@ -24,7 +24,7 @@ except RuntimeError:
 
 
 async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_middleware: DeleteMessagesMiddleware):
-    order_sender = OrderSender(bot, delete_middleware)
+    order_sender = OrderSender(bot, delete_middleware.chat_handler)
     await order_sender.update_settings()
     scheduler.add_job(order_sender.check_order_statuses, trigger='interval', seconds=5)
 
@@ -43,7 +43,7 @@ async def main():
     scheduler_middleware = SchedulerMiddleware(scheduler)
 
     await set_commands(bot)
-    # await create_scheduled_tasks(bot, scheduler, delete_middleware)
+    await create_scheduled_tasks(bot, scheduler, delete_middleware)
     scheduler.start()
     dp.callback_query.middleware.register(delete_middleware)
     dp.callback_query.middleware.register(rest_middleware)
