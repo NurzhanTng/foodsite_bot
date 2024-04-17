@@ -1,7 +1,9 @@
 from aiogram import Bot, Router, F
 import time
+from datetime import datetime
 import json
 import logging
+import asyncio
 from aiogram.filters import (Command, CommandObject, )
 from aiogram.types import Message, LabeledPrice, PreCheckoutQuery, ContentType
 
@@ -26,8 +28,9 @@ class OrderSender:
         self.orders = await self.fetch_orders()
 
     async def fetch_orders(self):
-        # logging.info("[fetch_orders] started")
         dict_orders = await self.rest.get('food/orders/')
+        current_time = datetime.now().time()
+        # logging.info(f"{current_time.strftime('%H:%M:%S')} [fetch_orders]: {dict_orders}")
         orders = []
         for order in dict_orders:
             orders.append(self.serializer.from_dict(order))
@@ -43,7 +46,7 @@ class OrderSender:
         return -1
 
     async def send_new_order(self, order: Order):
-        print('Order: ', self.serializer.to_dict(order))
+        # print('Order: ', self.serializer.to_dict(order))
         prices = [LabeledPrice(label=f"{product.product.name}, {product.active_modifier}", amount=product.price * 100)
                   for
                   product in
@@ -95,24 +98,26 @@ class OrderSender:
                     'Сейфуллина, 617 / 3 этаж',
             'on_delivery': 'Ваш заказ готов и передан доставщику. Ожидайте доставки в ближайшее время',
             'inactive': f'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено '
-                        f'{(order_price - order.bonus_amount + order.delivery_price) // 20} бонусных баллов',
+                        f'{(order_price - int(order.bonus_amount)) // 20} бонусных баллов',
             'rating': "Пожалуйста, выберите смайлик, который наилучшим образом описывает ваше впечатление от "
                       "заказа:\n\n😞 - Не понравилось\n😐 - Средне\n🙂 - Хорошо\n😊 - Отлично",
         }
         # 'Ваш заказ готов. Можете забрать его в выбранной точке' if order.is_delivery else 'Ваш заказ готов. Скоро
         # он будет передан курьеру',
         try:
-            if order.status == "done" and order.exact_address: return
+            if order.status == "done" and order.exact_address:
+                return
             if order.status == "inactive":
                 await self.message_history.delete_messages(order.client_id)
+                message_id = (await self.bot.send_message(order.client_id, text_by_status[order.status])).message_id
+                rating_id = (await self.bot.send_message(order.client_id, text_by_status['rating'],
+                                                         reply_markup=get_rating_inline_keyboard())).message_id
+                self.message_history.add_new_message(order.client_id, message_id)
+                self.message_history.add_new_message(order.client_id, rating_id)
+                return
+
             message_id = (await self.bot.send_message(order.client_id, text_by_status[order.status])).message_id
             self.message_history.add_new_message(order.client_id, message_id)
-            rating_id = (await self.bot.send_message(order.client_id, text_by_status['rating'],
-                                                     reply_markup=get_rating_inline_keyboard())).message_id
-            if order.status == "inactive":
-                await asyncio.sleep(10)
-                await self.message_history.delete_messages(order.client_id)
-                self.message_history.add_new_message(order.client_id, rating_id)
 
         except Exception as e:
             print(e)
