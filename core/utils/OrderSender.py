@@ -13,7 +13,7 @@ from core.keyboards.inline import get_rating_inline_keyboard
 
 
 class OrderSender:
-    def __init__(self, bot: Bot, message_history):
+    def __init__(self, bot: Bot, message_history: ChatHistoryHandler):
         self.orders: list[Order] = []
         self.manager_id: int = 0
         self.rest = RestHandler(bot)
@@ -59,10 +59,14 @@ class OrderSender:
             await self.bot.send_invoice(
                 order.client_id,
                 title="Оплата заказа",
-                photo_url="https://www.aroged.com/wp-content/uploads/2022/06/Telegram-has-a-premium-subscription.jpg",
-                photo_width=416,
-                photo_height=234,
-                photo_size=416,
+                photo_url="https://back.pizzeria-almaty.kz/media/images/pay_low.jpg",
+                photo_width=400,
+                photo_height=400,
+                photo_size=17_648,
+                # photo_url="https://back.pizzeria-almaty.kz/media/images/pay.jpg",
+                # photo_width=3000,
+                # photo_height=3000,
+                # photo_size=2_211_280,
                 description="Оплата заказа через карту",
                 provider_token=settings.bots.payments_token,
                 currency="kzt",
