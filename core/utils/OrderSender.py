@@ -24,20 +24,24 @@ class OrderSender:
         self.message_history = message_history
 
     async def update_settings(self):
-        # logging.info("[update_settings] started")
+        await self.fetch_manager()
         self.orders = await self.fetch_orders()
+        for order in self.orders:
+            if order.status == "inactive":
+                self.orders.remove(order)
+
+    async def delete_order(self, order) -> None:
+        self.orders.remove(order)
 
     async def fetch_orders(self):
         dict_orders = await self.rest.get('food/orders/')
-        current_time = datetime.now().time()
-        # logging.info(f"{current_time.strftime('%H:%M:%S')} [fetch_orders]: {dict_orders}")
         orders = []
         for order in dict_orders:
             orders.append(self.serializer.from_dict(order))
         return orders
 
     async def fetch_manager(self):
-        ...
+        self.manager_id = 1234249296
 
     def find_order(self, order_id: int):
         for order in self.orders:
@@ -46,7 +50,6 @@ class OrderSender:
         return -1
 
     async def send_new_order(self, order: Order):
-        # print('Order: ', self.serializer.to_dict(order))
         prices = [LabeledPrice(label=f"{product.product.name}, {product.active_modifier}", amount=product.price * 100)
                   for
                   product in
@@ -76,13 +79,13 @@ class OrderSender:
                 is_flexible=False,
                 prices=prices,
                 start_parameter="order-payment",
-                payload="TEST"
+                payload='Test'
             )
         ).message_id
 
         self.message_history.add_new_message(order.client_id, message_id)
         self.message_history.add_new_message(order.client_id, invoice_id)
-        await self.bot.send_message(1234249296, f"Получен новый заказ {order.id}")
+        await self.bot.send_message(self.manager_id, f"Получен новый заказ {order.id}")
 
     async def send_new_status(self, order: Order):
         order_price = 0
@@ -123,13 +126,13 @@ class OrderSender:
             print(e)
 
     async def check_order_statuses(self):
-        start_time = time.time()
         orders = await self.fetch_orders()
-        print(f'[{time.time() - start_time}s] Order statuses fetched: {orders}')
         for order in orders:
             oldOrder = self.find_order(order.id)
             if oldOrder == -1:
                 await self.send_new_order(order)
+                continue
+            if oldOrder.status == 'inactive':
                 continue
             if oldOrder.status != order.status:
                 await self.send_new_status(order)

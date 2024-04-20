@@ -15,7 +15,7 @@ class RestHandler:
     async def get(self, url: str, params: dict = None, headers: dict = None):
         async with aiohttp.ClientSession() as session:
             async with session.get(self.basic_url + url, params=params, headers=headers) as response:
-                print("Response", response)
+                # print("Response", response)
                 return await response.json()
 
     async def post(self, url: str, data: dict = None, headers: dict = None):
