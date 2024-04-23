@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Bot, Router, F
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
@@ -14,10 +16,17 @@ router = Router()
 @router.message(Command(commands=['start', 'run']))
 async def _get_start(message: Message, command: CommandObject, chat_handler: ChatHistoryHandler, rest: RestHandler,
                      state: FSMContext):
+    logging.info(f"User_id: {message.chat.id}")
     await message.answer('Добро пожаловать в нашего телеграм бота для заказа еды 🎉\n\n'
                          'Бот предлагает удобное меню, заказы и отслеживание статуса. \n'
                          'Получайте уведомления об акциях и бонусах в боте!')
     await get_start(message, chat_handler, rest, state, command)
+
+
+@router.message(Command(commands=['test']))
+async def test(message: Message):
+    logging.info(f"User_id: {message.chat.id}.")
+    logging.info(f"User_id: {message.model_dump_json(indent=2)}.")
 
 
 async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: RestHandler,
