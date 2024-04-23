@@ -31,7 +31,7 @@ async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_m
 async def main():
     logging.basicConfig(
         filemode='a',
-        filename=f'logs/bot.log',
+        filename=f'history/bot.log',
         level=logging.INFO,
         format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
     )
