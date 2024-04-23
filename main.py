@@ -29,6 +29,8 @@ async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_m
 
 
 async def main():
+    with open('history/bot.log', 'w') as file:
+        file.write('')
     logging.basicConfig(
         filemode='a',
         filename=f'history/bot.log',
