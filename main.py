@@ -25,7 +25,7 @@ except RuntimeError:
 async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_middleware: DeleteMessagesMiddleware):
     order_sender = OrderSender(bot, delete_middleware.chat_handler)
     await order_sender.update_settings()
-    scheduler.add_job(order_sender.check_order_statuses, trigger='interval', seconds=20)
+    scheduler.add_job(order_sender.check_order_statuses, trigger='interval', seconds=5)
 
 
 async def main():

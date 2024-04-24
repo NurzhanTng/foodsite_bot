@@ -48,7 +48,7 @@ class Order:
     id: int
     status: str
     products: List[OrderProduct]
-    client_id: int
+    client_id: str
     bonus_used: int
     bonus_amount: int
     user_name: str

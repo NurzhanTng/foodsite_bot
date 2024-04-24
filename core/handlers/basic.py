@@ -22,10 +22,10 @@ async def _get_start(message: Message, command: CommandObject, chat_handler: Cha
     await get_start(message, chat_handler, rest, state, command)
 
 
-@router.message(Command(commands=['test']))
-async def test(message: Message):
-    logging.info(f"User_id: {message.chat.id}.")
-    logging.info(f"User_id: {message.model_dump_json(indent=2)}.")
+# @router.message(Command(commands=['test']))
+# async def test(message: Message):
+#     logging.info(f"User_id: {message.chat.id}.")
+#     logging.info(f"User_id: {message.model_dump_json(indent=2)}.")
 
 
 async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: RestHandler,
@@ -37,7 +37,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             promo = command.args
 
         payload = {
-            'telegram_id': message.chat.id,
+            'telegram_id': str(message.chat.id),
             'telegram_fullname': message.from_user.full_name,
             'promo': promo
         }
@@ -63,7 +63,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         print(e)
 
 
-# @router.message(lambda message: not message.web_app_data)
-# async def handle_all_messages(message: Message, bot: Bot):
-#     await bot.delete_message(message.chat.id, message.message_id)
-#     ...
+@router.message(lambda message: not message.web_app_data)
+async def handle_all_messages(message: Message, bot: Bot):
+    await bot.delete_message(message.chat.id, message.message_id)
+    ...
