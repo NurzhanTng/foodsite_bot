@@ -8,6 +8,7 @@ class Bots:
     payments_token: str
     admin_id: int
     api_path: str
+    site_path: str
 
 
 @dataclass
@@ -24,6 +25,7 @@ def get_settings(path: str):
             bot_token=env.str("BOT_TOKEN"),
             admin_id=env.int("ADMIN_ID"),
             api_path=env.str("API_PATH"),
+            site_path=env.str("SITE_PATH"),
             payments_token=env.str("PAYMENTS_TOKEN")
         )
     )

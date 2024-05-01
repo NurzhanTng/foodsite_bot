@@ -6,10 +6,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types.web_app_info import WebAppInfo
 
 from core.utils.OrderTest import Order
+from core.settings import settings
 
 
 def get_web_url(order: str = None, path: str = '') -> str:
-    web_url = 'https://www.pizzeria-almaty.kz' + path
+    web_url = settings.bots.site_path + path
     if order is not None:
         web_url += f'/?cart={quote(json.dumps(json.loads(order)["products"]))}'
     return web_url
@@ -18,13 +19,13 @@ def get_web_url(order: str = None, path: str = '') -> str:
 def get_main_inline_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
 
-    keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
+    keyboard_builder.button(text='📕 Меню', web_app=WebAppInfo(url=settings.bots.site_path))
     # keyboard_builder.button(text='🛒 Корзина', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz/cart"))
     # keyboard_builder.button(text='🗃 История заказов', callback_data='show-history')
     keyboard_builder.button(text='🚖 Активные заказы', web_app=WebAppInfo(
-        url='https://www.pizzeria-almaty.kz/active_orders'))
+        url=settings.bots.site_path + 'active_orders'))
     keyboard_builder.button(text='🗃 История заказов', web_app=WebAppInfo(
-        url='https://www.pizzeria-almaty.kz/history_orders'))
+        url=settings.bots.site_path + 'history_orders'))
     keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
     keyboard_builder.button(text='📞 Контакты', callback_data='contact')
     keyboard_builder.adjust(1, 2, 2)
@@ -38,7 +39,7 @@ def get_main_inline_keyboard():
 def get_manager_inline_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
 
-    keyboard_builder.button(text='📋 Заказы', web_app=WebAppInfo(url="https://www.pizzeria-almaty.kz"))
+    keyboard_builder.button(text='📋 Заказы', web_app=WebAppInfo(url=settings.bots.site_path))
     keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
     keyboard_builder.adjust(1, 1, 1)
 

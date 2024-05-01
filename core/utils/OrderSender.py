@@ -41,7 +41,7 @@ class OrderSender:
         return orders
 
     async def fetch_manager(self):
-        self.manager_id = 1234249296
+        self.manager_id = 1011750552
 
     def find_order(self, order_id: int):
         for order in self.orders:
@@ -60,7 +60,7 @@ class OrderSender:
         # if not (order.exact_address is None or order.exact_address == ""):
         #     prices.append(LabeledPrice(label="Доставка", amount=int(order.delivery_price) * 100))
 
-        message_id = (await self.bot.send_message(order.client_id, f"Ваш заказ сохранен\n")).message_id
+        message_id = (await self.bot.send_message(int(order.client_id), f"Ваш заказ сохранен\n")).message_id
         invoice_id = (
             await self.bot.send_invoice(
                 order.client_id,
@@ -112,14 +112,15 @@ class OrderSender:
                 return
             if order.status == "inactive":
                 await self.message_history.delete_messages(order.client_id)
-                message_id = (await self.bot.send_message(order.client_id, text_by_status[order.status])).message_id
-                rating_id = (await self.bot.send_message(order.client_id, text_by_status['rating'],
+                message_id = (await self.bot.send_message(int(order.client_id), text_by_status[
+                    order.status])).message_id
+                rating_id = (await self.bot.send_message(int(order.client_id), text_by_status['rating'],
                                                          reply_markup=get_rating_inline_keyboard())).message_id
                 self.message_history.add_new_message(order.client_id, message_id)
                 self.message_history.add_new_message(order.client_id, rating_id)
                 return
 
-            message_id = (await self.bot.send_message(order.client_id, text_by_status[order.status])).message_id
+            message_id = (await self.bot.send_message(int(order.client_id), text_by_status[order.status])).message_id
             self.message_history.add_new_message(order.client_id, message_id)
 
         except Exception as e:

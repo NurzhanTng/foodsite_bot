@@ -7,13 +7,15 @@ class ChatHistoryHandler:
         self.bot = bot
         self.messages = {}
 
-    def add_new_message(self, user_id: int, message_id: int) -> None:
-        if user_id in self.messages:
-            self.messages[user_id].append(message_id)
+    def add_new_message(self, chat_id: int | str, message_id: int) -> None:
+        chat_id = int(chat_id)
+        if chat_id in self.messages:
+            self.messages[chat_id].append(message_id)
         else:
-            self.messages[user_id] = [message_id]
+            self.messages[chat_id] = [message_id]
 
-    async def delete_messages(self, chat_id: int) -> None:
+    async def delete_messages(self, chat_id: int | str) -> None:
+        chat_id = int(chat_id)
         try:
             message_ids = self.messages.get(chat_id, [])
             if message_ids:
