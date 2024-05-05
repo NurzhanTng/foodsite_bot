@@ -10,6 +10,7 @@ from aiogram.types import Message, LabeledPrice, PreCheckoutQuery, ContentType
 from core.settings import settings
 from core.utils.RestHandler import RestHandler
 from core.models.Order import Order, OrderSerializer
+from core.models.Company import Company, CompanySerializer
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.keyboards.inline import get_rating_inline_keyboard
 
@@ -17,14 +18,13 @@ from core.keyboards.inline import get_rating_inline_keyboard
 class OrderSender:
     def __init__(self, bot: Bot, message_history: ChatHistoryHandler):
         self.orders: list[Order] = []
-        self.manager_id: int = 0
         self.rest = RestHandler(bot)
         self.bot: Bot = bot
         self.serializer = OrderSerializer()
+        self.company_serializer = CompanySerializer()
         self.message_history = message_history
 
     async def update_settings(self):
-        await self.fetch_manager()
         self.orders = await self.fetch_orders()
         for order in self.orders:
             if order.status == "inactive":
@@ -40,8 +40,10 @@ class OrderSender:
             orders.append(self.serializer.from_dict(order))
         return orders
 
-    async def fetch_manager(self):
-        self.manager_id = 1011750552
+    async def fetch_manager(self, company_id: int) -> str:
+        company_dict = await self.rest.get(f"service/company_spots/{company_id}")
+        company = self.company_serializer.from_dict(company_dict)
+        return company.manager
 
     def find_order(self, order_id: int):
         for order in self.orders:
@@ -50,42 +52,43 @@ class OrderSender:
         return -1
 
     async def send_new_order(self, order: Order):
-        prices = [LabeledPrice(label=f"{product.product.name}, {product.active_modifier}", amount=product.price * 100)
-                  for
-                  product in
-                  order.products]
-
-        if order.bonus_used:
-            prices.append(LabeledPrice(label="Использованный бонус", amount=-100 * order.bonus_amount))
+        # prices = [LabeledPrice(label=f"{product.product.name}, {product.active_modifier}", amount=product.price * 100)
+        #           for
+        #           product in
+        #           order.products]
+        #
+        # if order.bonus_used:
+        #     prices.append(LabeledPrice(label="Использованный бонус", amount=-100 * order.bonus_amount))
         # if not (order.exact_address is None or order.exact_address == ""):
         #     prices.append(LabeledPrice(label="Доставка", amount=int(order.delivery_price) * 100))
 
         message_id = (await self.bot.send_message(int(order.client_id), f"Ваш заказ сохранен\n")).message_id
-        invoice_id = (
-            await self.bot.send_invoice(
-                order.client_id,
-                title="Оплата заказа",
-                photo_url="https://back.pizzeria-almaty.kz/media/images/pay_low.jpg",
-                photo_width=400,
-                photo_height=400,
-                photo_size=17_648,
-                # photo_url="https://back.pizzeria-almaty.kz/media/images/pay.jpg",
-                # photo_width=3000,
-                # photo_height=3000,
-                # photo_size=2_211_280,
-                description="Оплата заказа через карту",
-                provider_token=settings.bots.payments_token,
-                currency="kzt",
-                is_flexible=False,
-                prices=prices,
-                start_parameter="order-payment",
-                payload='Test'
-            )
-        ).message_id
+        # invoice_id = (
+        #     await self.bot.send_invoice(
+        #         order.client_id,
+        #         title="Оплата заказа",
+        #         photo_url="https://back.pizzeria-almaty.kz/media/images/pay_low.jpg",
+        #         photo_width=400,
+        #         photo_height=400,
+        #         photo_size=17_648,
+        #         # photo_url="https://back.pizzeria-almaty.kz/media/images/pay.jpg",
+        #         # photo_width=3000,
+        #         # photo_height=3000,
+        #         # photo_size=2_211_280,
+        #         description="Оплата заказа через карту",
+        #         provider_token=settings.bots.payments_token,
+        #         currency="kzt",
+        #         is_flexible=False,
+        #         prices=prices,
+        #         start_parameter="order-payment",
+        #         payload='Test'
+        #     )
+        # ).message_id
 
         self.message_history.add_new_message(order.client_id, message_id)
-        self.message_history.add_new_message(order.client_id, invoice_id)
-        await self.bot.send_message(self.manager_id, f"Получен новый заказ {order.id}")
+        # self.message_history.add_new_message(order.client_id, invoice_id)
+        manager_id = await self.fetch_manager(order.company_id)
+        await self.bot.send_message(manager_id, f"Получен новый заказ {order.id}")
 
     async def send_new_status(self, order: Order):
         order_price = 0

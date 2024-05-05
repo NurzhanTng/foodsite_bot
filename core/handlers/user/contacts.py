@@ -20,7 +20,8 @@ async def get_my_data(callback: CallbackQuery, chat_handler: ChatHistoryHandler,
                                     f'🍜 *Monopizza*\n'
                                     f'Наши контакты: +7 (702) 136 6697\n'
                                     f'Инстаграм: [Monopizza](https://www.instagram.com/pizza.mono/)'
-                                    f'\nАдрес: [г.Алматы. Улица Курмангазы 54](https://2gis.kz/almaty/geo/70000001066330354)',
+                                    f'\nАдрес: [г.Алматы. Проспект Сейфуллина 617]('
+                                    f'https://2gis.kz/almaty/geo/70000001051319642)',
                                     reply_markup=get_back_inline_keyboard())
 
 

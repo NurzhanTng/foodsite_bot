@@ -1,13 +1,13 @@
 import asyncio
 import json
 import logging
-import websockets
 from aiogram import Bot, Dispatcher
 from aiogram.utils.chat_action import ChatActionMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from core.handlers import manager, user, basic, pay
 from core.handlers.user import rating
+from core.handlers import websocket_handler
 from core.middlewares.TestManagerMiddleware import TestManagerMiddleware
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
 from core.middlewares.AppShedulerMiddleware import SchedulerMiddleware
@@ -16,10 +16,10 @@ from core.settings import settings
 from core.utils.set_commands import set_commands
 from core.utils.OrderSender import OrderSender
 
-# try:
-#     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-# except RuntimeError:
-#     print("Can't set event loop policy")
+try:
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+except RuntimeError:
+    print("Can't set event loop policy")
 
 
 async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_middleware: DeleteMessagesMiddleware):
@@ -62,7 +62,10 @@ async def main():
     dp.include_routers(pay.router, rating.router, manager.router, user.router, basic.router)
 
     try:
-        await dp.start_polling(bot)
+        # ws_task = asyncio.create_task(websocket_handler.handle_websocket(
+        #     "wss://back.pizzeria-almaty.kz:443/ws/orders/"))
+        dp_task = asyncio.create_task(dp.start_polling(bot))
+        await asyncio.gather(dp_task)
     finally:
         await bot.session.close()
 
