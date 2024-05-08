@@ -32,6 +32,17 @@ def get_main_reply_keyboard(order: dict | None):
         resize_keyboard=True,
     )
 
+def get_delivery_reply_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+
+    keyboard_builder.button(text='🚖 Активные заказы', callback_data='show-cart')
+    keyboard_builder.button(text='👤 Мои данные', callback_data='my-data')
+
+    return keyboard_builder.as_markup(
+        input_field_placeholder='Выберите действие',
+        resize_keyboard=True,
+    )
+
 
 def get_manager_reply_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
@@ -103,10 +114,10 @@ def order_reply_keyboard(order: dict | None, placeholder: str, additional_button
     )
 
 
-def get_delivery_reply_keyboard(order: dict | None):
-    return order_reply_keyboard(order,
-                                placeholder='Выберите способ получения заказа',
-                                additional_buttons=['🛵 Доставить', '🚶🏼 Самовывоз'])
+# def get_delivery_reply_keyboard(order: dict | None):
+#     return order_reply_keyboard(order,
+#                                 placeholder='Выберите способ получения заказа',
+#                                 additional_buttons=['🛵 Доставить', '🚶🏼 Самовывоз'])
 
 
 def get_usernames_reply_keyboard(order: dict | None, user: dict):

@@ -113,3 +113,29 @@ def get_rating_inline_keyboard():
     return keyboard_builder.as_markup(
         resize_keyboard=True
     )
+
+
+def get_order_inline_keyboard(order: Order):
+    keyboard_builder = InlineKeyboardBuilder()
+
+    keyboard_builder.button(text=f"Открыть заказ № {order.id}", callback_data=f'delivery-{order.id}')
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True
+    )
+
+
+def get_order_end_inline_keyboard(order_id: str | int):
+    keyboard_builder = InlineKeyboardBuilder()
+
+    keyboard_builder.button(text='🍱 Посмотреть заказ', web_app=WebAppInfo(
+        url=settings.bots.site_path + f'delivery_order/{order_id}'))
+    keyboard_builder.button(text='🚩 Завершить заказ', callback_data=f'order_end-{order_id}')
+    keyboard_builder.button(text='🔙 На главную', callback_data='to-back')
+
+    keyboard_builder.adjust(1, 1, 1)
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True,
+        # one_time_keyboard=True
+    )

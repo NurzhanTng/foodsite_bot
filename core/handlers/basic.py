@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from core.keyboards.inline import get_main_inline_keyboard, get_manager_inline_keyboard
+from core.keyboards.reply import get_delivery_reply_keyboard
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.utils.RestHandler import RestHandler
 from core.filters.without_state_filter import WithoutStateFilter
@@ -44,10 +45,10 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
 
         user = await rest.post(url=f'auth/register/', data=payload)
         await state.update_data(user=user)
-            
+
         if user["role"] == "manager":
             await chat_handler.send_message(message,
-                                            f"*Вы находитесь на главной странице менеджера*\n"
+                                            f"*🏠 Вы находитесь на главной странице менеджера*\n"
                                             f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
                                             reply_markup=get_manager_inline_keyboard())
 
@@ -59,6 +60,12 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
                                             f"_При оформление заказа, вы сможете потратить эти бонусы_\n" +
                                             f"_Чтобы сделать предзаказ, воспользуйтесь кнопками._",
                                             reply_markup=get_main_inline_keyboard())
+
+        if user["role"] == "delivery":
+            await chat_handler.send_message(message,
+                                            "*🏠 Вы находитесь на главной странице доставщика*\n"
+                                            f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
+                                            reply_markup=get_delivery_reply_keyboard())
     except Exception as e:
         print(e)
 

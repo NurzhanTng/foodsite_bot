@@ -104,9 +104,10 @@ class OrderSender:
                     'Сейфуллина, 617 / 3 этаж',
             'on_delivery': 'Ваш заказ готов и передан доставщику. Ожидайте доставки в ближайшее время',
             'inactive': f'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено '
-                        f'{(order_price - int(order.bonus_amount)) // 20} бонусных баллов',
+                        f'{(order_price - (int(order.bonus_amount) if order.bonus_used else 0)) // 20} бонусных баллов',
             'rating': "Пожалуйста, выберите смайлик, который наилучшим образом описывает ваше впечатление от "
                       "заказа:\n\n😞 - Не понравилось\n😐 - Средне\n🙂 - Хорошо\n😊 - Отлично",
+            'rejected': f"Ваш заказ был отклонен. Причина: *{order.rejected_text}*"
         }
         # 'Ваш заказ готов. Можете забрать его в выбранной точке' if order.is_delivery else 'Ваш заказ готов. Скоро
         # он будет передан курьеру',
@@ -121,6 +122,14 @@ class OrderSender:
                                                          reply_markup=get_rating_inline_keyboard())).message_id
                 self.message_history.add_new_message(order.client_id, message_id)
                 self.message_history.add_new_message(order.client_id, rating_id)
+                return
+            if order.status == "on_delivery":
+                message_id = (await self.bot.send_message(int(order.client_id), text_by_status[
+                    order.status])).message_id
+                del_message_id = (await self.bot.send_message(int(order.delivery_id),
+                                                              f"Вам назначили новый заказ № {order.id}")).message_id
+                self.message_history.add_new_message(order.client_id, message_id)
+                self.message_history.add_new_message(order.delivery_id, del_message_id)
                 return
 
             message_id = (await self.bot.send_message(int(order.client_id), text_by_status[order.status])).message_id

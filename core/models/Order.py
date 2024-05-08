@@ -60,6 +60,10 @@ class Order:
     kaspi_phone: str
     client_comment: str
     actions: List[dict]
+    delivery_id: str
+    rating: int
+    is_delivery: bool
+    rejected_text: str
 
 
 @dataclass
@@ -81,7 +85,11 @@ class OrderSerializer:
             "kaspi_phone": order.kaspi_phone,
             "client_comment": order.client_comment,
             "delivery_price": order.delivery_price,
-            "actions": order.actions
+            "actions": order.actions,
+            "delivery_id": order.delivery_id,
+            "rating": order.rating,
+            "is_delivery": order.is_delivery,
+            "rejected_text": order.rejected_text
         }
 
     @staticmethod
@@ -103,5 +111,9 @@ class OrderSerializer:
             phone=data['phone'],
             kaspi_phone=data['kaspi_phone'],
             client_comment=data['client_comment'],
-            actions=data['actions']
+            actions=data['actions'],
+            delivery_id=data['delivery_id'],
+            rating=data['rating'],
+            is_delivery=data['is_delivery'],
+            rejected_text=data['rejected_text']
         )

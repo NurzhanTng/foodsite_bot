@@ -17,4 +17,8 @@ class States(StatesGroup):
 
     ORDER_SHOW = State()
     ORDER_STATUS_CHANGE = State()
+    EMPTY_ORDER_LIST = State()
+    DELIVERY_ORDER = State()
+    ORDER_END = State()
+    ORDER_WRITE_TOKEN = State()
 

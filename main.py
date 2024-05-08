@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.utils.chat_action import ChatActionMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from core.handlers import manager, user, basic, pay
+from core.handlers import delivery, manager, user, basic, pay
 from core.handlers.user import rating
 from core.handlers import websocket_handler
 from core.middlewares.TestManagerMiddleware import TestManagerMiddleware
@@ -59,7 +59,7 @@ async def main():
     dp.message.middleware.register(ChatActionMiddleware())
     dp.message.middleware.register(scheduler_middleware)
 
-    dp.include_routers(pay.router, rating.router, manager.router, user.router, basic.router)
+    dp.include_routers(pay.router, rating.router, delivery.router, manager.router, user.router, basic.router)
 
     try:
         # ws_task = asyncio.create_task(websocket_handler.handle_websocket(
