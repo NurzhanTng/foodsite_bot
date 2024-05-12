@@ -42,10 +42,16 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             'telegram_fullname': message.from_user.full_name,
             'promo': promo
         }
-
         user = await rest.post(url=f'auth/register/', data=payload)
-        await state.update_data(user=user)
+        if type(user) == type([]):
+            payload = {
+                'telegram_id': str(message.chat.id),
+                'telegram_fullname': message.from_user.full_name,
+                'promo': ''
+            }
+            user = await rest.post(url=f'auth/register/', data=payload)
 
+        await state.update_data(user=user)
         if user["role"] == "manager":
             await chat_handler.send_message(message,
                                             f"*🏠 Вы находитесь на главной странице менеджера*\n"

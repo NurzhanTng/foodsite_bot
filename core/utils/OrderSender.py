@@ -132,6 +132,12 @@ class OrderSender:
                 self.message_history.add_new_message(order.delivery_id, del_message_id)
                 return
 
+            if order.status == 'rejected' and order.bonus_used and order.bonus_amount != 0:
+                message_id = (await self.bot.send_message(
+                    int(order.client_id),
+                    f"Вам начислено {order.bonus_amount} бонусов")).message_id
+                self.message_history.add_new_message(order.client_id, message_id)
+
             message_id = (await self.bot.send_message(int(order.client_id), text_by_status[order.status])).message_id
             self.message_history.add_new_message(order.client_id, message_id)
 
