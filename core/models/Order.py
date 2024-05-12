@@ -64,6 +64,8 @@ class Order:
     rating: int
     is_delivery: bool
     rejected_text: str
+    updated_at: str
+    created_at: str
 
 
 @dataclass
@@ -89,7 +91,9 @@ class OrderSerializer:
             "delivery_id": order.delivery_id,
             "rating": order.rating,
             "is_delivery": order.is_delivery,
-            "rejected_text": order.rejected_text
+            "rejected_text": order.rejected_text,
+            "updated_at": order.updated_at,
+            "created_at": order.created_at,
         }
 
     @staticmethod
@@ -115,5 +119,7 @@ class OrderSerializer:
             delivery_id=data['delivery_id'],
             rating=data['rating'],
             is_delivery=data['is_delivery'],
-            rejected_text=data['rejected_text']
+            rejected_text=data['rejected_text'],
+            created_at=data['created_at'],
+            updated_at=data['updated_at'],
         )
