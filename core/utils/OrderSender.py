@@ -36,6 +36,8 @@ class OrderSender:
         orders = []
         for dict_order in dict_orders:
             order = self.serializer.from_dict(dict_order)
+            if order.created_at.endswith('Z'):
+                order.created_at = order.created_at[:-1] + '+00:00'
             given_datetime = datetime.strptime(order.created_at, "%Y-%m-%dT%H:%M:%S.%fZ")
             time_difference = current_datetime - given_datetime
             if time_difference < timedelta(days=1):
