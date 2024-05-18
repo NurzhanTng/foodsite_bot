@@ -1,6 +1,6 @@
 from aiogram import Bot, Router, F
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import logging
 import asyncio
@@ -31,17 +31,22 @@ class OrderSender:
         self.orders.remove(order)
 
     async def fetch_orders(self):
-        current_datetime = datetime.utcnow()
+        current_datetime = datetime.now(timezone.utc)  
         dict_orders = await self.rest.get('food/orders/')
         orders = []
+
         for dict_order in dict_orders:
             order = self.serializer.from_dict(dict_order)
+
             if order.created_at.endswith('Z'):
                 order.created_at = order.created_at[:-1] + '+00:00'
-            given_datetime = datetime.strptime(order.created_at, "%Y-%m-%dT%H:%M:%S.%fz")
+            
+            given_datetime = datetime.strptime(order.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
             time_difference = current_datetime - given_datetime
+            
             if time_difference < timedelta(days=1):
                 orders.append(order)
+        
         return orders
 
     async def fetch_manager(self, company_id: int) -> str:
