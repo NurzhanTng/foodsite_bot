@@ -65,7 +65,7 @@ async def order_end(callback: CallbackQuery, chat_handler: ChatHistoryHandler, s
     order_keys[order.delivery_id] = {'token': randint(100000, 999999), "order_id": order.id}
 
     client_message_id = (
-        (await callback.message.bot.send_message(int(order.delivery_id),
+        (await callback.message.bot.send_message(int(order.client_id),
                                                  f"Для завершения заказа, вам необходимо передать "
                                                  f"пароль доставщику: {order_keys[order.delivery_id].get('token')}"))
         .message_id)
