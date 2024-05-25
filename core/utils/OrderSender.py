@@ -155,7 +155,9 @@ class OrderSender:
 
     async def check_order_statuses(self):
         orders = await self.fetch_orders()
+        # print("[[check_order_statuses | started]]")
         for order in orders:
+            # print(order.id)
             oldOrder = self.find_order(order.id)
             if oldOrder == -1:
                 await self.send_new_order(order)
@@ -165,4 +167,5 @@ class OrderSender:
             if oldOrder.status != order.status:
                 await self.send_new_status(order)
                 continue
+        # print("[[check_order_statuses | ended]]")
         self.orders = orders
