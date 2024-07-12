@@ -5,8 +5,7 @@ from core.settings import settings
 
 
 class RestHandler:
-    def __init__(self, bot: Bot):
-        self.bot = bot
+    def __init__(self, bot: Bot = None):
         self.basic_url = settings.bots.api_path
         self.basic_headers = {
             'Content-Type': 'application/json',

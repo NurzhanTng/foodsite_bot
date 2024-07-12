@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from core.handlers import delivery, manager, user, basic, pay
 from core.handlers.user import rating
 from core.handlers import websocket_handler
+from core.handlers.websocket import connect as websockets_connect
 from core.middlewares.TestManagerMiddleware import TestManagerMiddleware
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
 from core.middlewares.AppShedulerMiddleware import SchedulerMiddleware
@@ -24,8 +25,8 @@ from core.utils.OrderSender import OrderSender
 
 async def create_scheduled_tasks(bot: Bot, scheduler: AsyncIOScheduler, delete_middleware: DeleteMessagesMiddleware):
     order_sender = OrderSender(bot, delete_middleware.chat_handler)
-    await order_sender.update_settings()
-    scheduler.add_job(order_sender.check_order_statuses, trigger='interval', seconds=5)
+    # await order_sender.update_settings()
+    # scheduler.add_job(order_sender.check_order_statuses, trigger='interval', seconds=5)
 
 
 async def main():
@@ -62,10 +63,10 @@ async def main():
     dp.include_routers(pay.router, rating.router, delivery.router, manager.router, user.router, basic.router)
 
     try:
-        # ws_task = asyncio.create_task(websocket_handler.handle_websocket(
-        #     "wss://back.pizzeria-almaty.kz:443/ws/orders/"))
+        # await dp.start_polling(bot)
+        ws_task = asyncio.create_task(websockets_connect(bot, delete_middleware))
         dp_task = asyncio.create_task(dp.start_polling(bot))
-        await asyncio.gather(dp_task)
+        await asyncio.gather(ws_task, dp_task)
     finally:
         await bot.session.close()
 

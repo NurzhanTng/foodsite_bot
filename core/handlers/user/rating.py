@@ -22,6 +22,6 @@ async def test_rating(message: Message, chat_handler: ChatHistoryHandler):
 
 @router.callback_query(F.data.startswith('rating'))
 async def get_my_data(callback: CallbackQuery, chat_handler: ChatHistoryHandler, rest: RestHandler, state: FSMContext):
-    print(callback.data)
+    print(callback.data.split('-')[1])
     await chat_handler.delete_messages(callback.message.chat.id)
     await get_start(callback.message, chat_handler, rest, state)

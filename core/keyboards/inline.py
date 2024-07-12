@@ -139,3 +139,13 @@ def get_order_end_inline_keyboard(order_id: str | int):
         resize_keyboard=True,
         # one_time_keyboard=True
     )
+
+
+def get_manager_order_inline_keyboard(order_id: str | int):
+    keyboard_builder = InlineKeyboardBuilder()
+
+    keyboard_builder.button(text='Перейти к заказу', web_app=WebAppInfo(url=settings.bots.site_path + f"orders/{order_id}"))
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True
+    )
