@@ -1,29 +1,22 @@
 import logging
-from core.utils.RestHandler import RestHandler
 from aiogram import Bot, Router, F
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
-from core.models.Company import CompanySerializer
 from core.models.Order import Order
 from core.keyboards.inline import get_manager_order_inline_keyboard
-
-
-rest = RestHandler()
-company_serializer = CompanySerializer()
-
-
-async def fetch_manager(company_id: int) -> str:
-    company_dict = await rest.get(f"service/company_spots/{company_id}")
-    company = company_serializer.from_dict(company_dict)
-    return company.manager
+from core.utils.fetch_managers import fetch_managers
 
 
 async def new_order(bot: Bot, message_history: ChatHistoryHandler, manager_history: ChatHistoryHandler, order: Order):
-    # message_id = (await bot.send_message(int(order.client_id), f"Ваш заказ сохранен\n")).message_id
-    # message_history.add_new_message(order.client_id, message_id)
-    manager_id = await fetch_manager(order.company_id)
-    message_id = (await bot.send_message(manager_id, f"Получен новый заказ {order.id}",
-                  reply_markup=get_manager_order_inline_keyboard(order.id))).message_id
-    manager_history.add_new_message(f'{manager_id}|{order.id}', message_id)
+        message_id = (await bot.send_message(int(order.client_id), f"Ваш заказ сохранен\n")).message_id
+        message_history.add_new_message(order.client_id, message_id)
+        manager_ids = await fetch_managers(order.company_id)
+        for manager_id in manager_ids:
+            try:
+                message_id = (await bot.send_message(int(manager_id), f"Получен новый заказ {order.id}",
+                                                     reply_markup=get_manager_order_inline_keyboard(order.id))).message_id
+                manager_history.add_new_message(f'{manager_id}|{order.id}', message_id)
+            except Exception as e:
+                logging.error(f"New order error: {e}")
 
 
 def invoice_test():

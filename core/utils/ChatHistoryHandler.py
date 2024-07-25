@@ -17,7 +17,7 @@ class ChatHistoryHandler:
             self.messages[chat_id] = [message_id]
 
     async def delete_messages(self, chat_id: int | str, separator: str | None = None) -> None:
-        logging.info(f'delete_messages: {chat_id}, {separator}, {self.messages[chat_id]}')
+        logging.info(f'delete_messages: {chat_id}, {separator}, {self.messages.get(chat_id, [])}')
         if separator is None:
             telegram_chat_id = int(chat_id)
         else:

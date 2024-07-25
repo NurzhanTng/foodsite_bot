@@ -16,6 +16,8 @@ router = Router()
 async def get_my_data(callback: CallbackQuery, chat_handler: ChatHistoryHandler, state: FSMContext):
     context = await state.get_data()
     user = context.get('user')
+    if user is None:
+        return
 
     await chat_handler.delete_messages(callback.message.chat.id)
     await chat_handler.send_message(callback.message, f'👤 *Мои данные:*\n\n'
