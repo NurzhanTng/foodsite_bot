@@ -52,7 +52,7 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             user = await rest.post(url=f'auth/register/', data=payload)
 
         await state.update_data(user=user)
-        if user["role"] == "manager":
+        if user["role"] == "admin":
             await chat_handler.send_message(message,
                                             f"*🏠 Вы находитесь на главной странице админа компании*\n"
                                             f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
