@@ -3,7 +3,7 @@ from aiogram import Bot, Router, F
 from core.models.Order import Order
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.keyboards.inline import get_rating_inline_keyboard
-from core.utils.fetch_users import fetch_managers
+from core.utils.fetch_users import fetch_users
 
 
 async def send_new_order_to_role(company_id: int, order_id: int, role: str):
@@ -45,7 +45,7 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler, manager_hi
     }
     try:
         if order.status in ["payment_await", "active"]:
-            manager_ids = await fetch_managers(order.company_id)
+            manager_ids = await fetch_users(order.company_id, 'manager')
             for manager_id in manager_ids:
                 await manager_history.delete_messages(f'{manager_id}|{order.id}', '|')
 

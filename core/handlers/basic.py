@@ -54,6 +54,12 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         await state.update_data(user=user)
         if user["role"] == "manager":
             await chat_handler.send_message(message,
+                                            f"*🏠 Вы находитесь на главной странице админа компании*\n"
+                                            f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
+                                            reply_markup=get_manager_inline_keyboard())
+
+        if user["role"] == "manager":
+            await chat_handler.send_message(message,
                                             f"*🏠 Вы находитесь на главной странице менеджера*\n"
                                             f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
                                             reply_markup=get_manager_inline_keyboard())
