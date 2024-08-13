@@ -3,20 +3,28 @@ from aiogram import Bot, Router, F
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.models.Order import Order
 from core.keyboards.inline import get_manager_order_inline_keyboard
-from core.utils.fetch_managers import fetch_managers
+from core.utils.fetch_users import fetch_users
+
+
+async def send_new_order_to_role(company_id: int, order_id: int, role: str):
+    ids = await fetch_users(company_id, role)
+    for user_id in ids:
+        try:
+            message_id = (await bot.send_message(int(manager_id), f"Получен новый заказ {order_id}",
+                                                 reply_markup=get_manager_order_inline_keyboard(order_id))).message_id
+            manager_history.add_new_message(f'{manager_id}|{order_id}', message_id)
+        except Exception as e:
+            logging.error(f"New order error [{role}]: {e}")
 
 
 async def new_order(bot: Bot, message_history: ChatHistoryHandler, manager_history: ChatHistoryHandler, order: Order):
+    try:
         message_id = (await bot.send_message(int(order.client_id), f"Ваш заказ сохранен\n")).message_id
         message_history.add_new_message(order.client_id, message_id)
-        manager_ids = await fetch_managers(order.company_id)
-        for manager_id in manager_ids:
-            try:
-                message_id = (await bot.send_message(int(manager_id), f"Получен новый заказ {order.id}",
-                                                     reply_markup=get_manager_order_inline_keyboard(order.id))).message_id
-                manager_history.add_new_message(f'{manager_id}|{order.id}', message_id)
-            except Exception as e:
-                logging.error(f"New order error: {e}")
+        await send_new_order_to_role(order.company_id, order.id, 'manager')
+        await send_new_order_to_role(order.company_id, order.id, 'admin')
+    except Exception as e:
+        logging.error(f"Error new_order: {e}")
 
 
 def invoice_test():

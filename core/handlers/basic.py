@@ -58,6 +58,18 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
                                             f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
                                             reply_markup=get_manager_inline_keyboard())
 
+        if user["role"] == "cook":
+            await chat_handler.send_message(message,
+                                            f"*🏠 Вы находитесь на главной странице повара*\n"
+                                            f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
+                                            reply_markup=get_manager_inline_keyboard())
+
+        if user["role"] == "runner":
+            await chat_handler.send_message(message,
+                                            f"*🏠 Вы находитесь на главной странице с раздачей готовых заказов*\n"
+                                            f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
+                                            reply_markup=get_manager_inline_keyboard())
+
         if user["role"] == "client":
             await chat_handler.send_message(message,
                                             f"*Вы находитесь на главной странице* "

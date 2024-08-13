@@ -23,4 +23,4 @@ async def order_main(bot: Bot, message_history: ChatHistoryHandler, manager_hist
         else:
             await order_change(bot, message_history, manager_history, order)
     except Exception as e:
-        logging.error(e)
+        logging.error(f"Error order_main: {e}")
