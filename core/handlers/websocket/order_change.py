@@ -6,13 +6,13 @@ from core.keyboards.inline import get_rating_inline_keyboard
 from core.utils.fetch_users import fetch_users
 
 
-async def send_new_order_to_role(company_id: int, order_id: int, role: str):
+async def send_new_order_to_role(company_id: int, order_id: int, bot: Bot, role: str):
     ids = await fetch_users(company_id, role)
     for user_id in ids:
         try:
-            message_id = (await bot.send_message(int(manager_id), f"Получен новый заказ {order_id}",
+            message_id = (await bot.send_message(int(user_id), f"Получен новый заказ {order_id}",
                                                  reply_markup=get_manager_order_inline_keyboard(order_id))).message_id
-            manager_history.add_new_message(f'{manager_id}|{order_id}', message_id)
+            manager_history.add_new_message(f'{user_id}|{order_id}', message_id)
         except Exception as e:
             logging.error(f"New order error [{role}]: {e}")
 
@@ -54,11 +54,11 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler, manager_hi
                 (order.status == "manager_await" and order.rejected_text)):
             return
         if order.status == "active":
-            await send_new_order_to_role(order.company_id, order.id, 'cook')
+            await send_new_order_to_role(order.company_id, order.id, bot,  'cook')
         if order.status == "on_runner":
-            await send_new_order_to_role(order.company_id, order.id, 'runner')
+            await send_new_order_to_role(order.company_id, order.id, bot, 'runner')
         if order.status == "on_delivery":
-            await send_new_order_to_role(order.company_id, order.id, 'delivery')
+            await send_new_order_to_role(order.company_id, order.id, bot,  'delivery')
         if order.status == "inactive":
             await message_history.delete_messages(order.client_id)
             message_id = (await bot.send_message(int(order.client_id), text_by_status[
