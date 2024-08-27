@@ -34,8 +34,8 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
         company_name = company.get("name", "")
         company_address = company.get("address", {}).get("parsed", "")
         address_link = company.get("address_link", "")
-        address_text = (f'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: {company_name} '
-                        f'[{company_address}]({address_link})')
+        address_text = f'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: {company_name} ' + \
+                       f'[{company_address}]({address_link})'
         print("Address text: ", address_text)
 
     text_by_status = {
@@ -90,16 +90,27 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
         logging.error(f"Error [order_change (message send)]: {e}")
 
     try:
-        if order.status == "inactive" and not isinstance(order.rating, int):
-            await message_history.delete_messages(order.client_id)
+        if order.status == "inactive":
+            print(1)
+            if isinstance(order.rating, int):
+                return
+            try:
+                await message_history.delete_messages(order.client_id)
+            except Exception as e:
+                print(f'Huilo ebanoe: ', order.client_id, e)
+            print(2)
             message_id = (await bot.send_message(int(order.client_id), text_by_status[
                 order.status])).message_id
+            print(3)
             rating_id = (await bot.send_message(int(order.client_id), text_by_status['rating'],
                                                 reply_markup=get_rating_inline_keyboard(order.id))).message_id
+            print(4, order.client_id, message_id)
             message_history.add_new_message(order.client_id, message_id)
             print('websocket message rating: ', order.client_id, type(order.client_id))
+            print(5)
             message_history.add_new_message(order.client_id, rating_id)
             return
+        print(6)
         if order.status == "on_delivery":
             message_id = (await bot.send_message(int(order.client_id), text_by_status[
                 order.status])).message_id
@@ -109,13 +120,17 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
             message_history.add_new_message(order.delivery_id, del_message_id)
             return
 
+        print(7)
         if order.status == 'rejected' and order.bonus_used and order.bonus_amount != 0:
             message_id = (await bot.send_message(
                 int(order.client_id),
                 f"Вам начислено {order.bonus_amount} бонусов")).message_id
             message_history.add_new_message(order.client_id, message_id)
 
+        print("Pidor")
         message_id = (await bot.send_message(int(order.client_id), text_by_status[order.status])).message_id
+        print(8)
         message_history.add_new_message(order.client_id, message_id)
+        print(9)
     except Exception as e:
         logging.error(f"Error [order_change]: {e}")
