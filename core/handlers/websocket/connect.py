@@ -11,7 +11,6 @@ from core.utils.ChatHistoryHandler import ChatHistoryHandler
 
 async def connect(bot: Bot, delete_middleware: DeleteMessagesMiddleware):
     serializer = OrderUpdateSerializer()
-    manager_chat_history = ChatHistoryHandler(bot)
 
     while True:
         try:
@@ -26,11 +25,12 @@ async def connect(bot: Bot, delete_middleware: DeleteMessagesMiddleware):
                         break
                     try:
                         order_update = serializer.from_dict(data)
-                        await order_main(bot, delete_middleware.chat_handler, manager_chat_history, order_update)
+                        await order_main(bot, delete_middleware.chat_handler, order_update)
                     except Exception as e:
                         logging.error(f"WebSocket error: {e}")
                         await asyncio.sleep(5)
         except Exception as e:
             logging.error(f"WebSocket connection error: {e}")
             await bot.send_message(1234249296, 'Websocket перестал работу')
+            await bot.send_message(1770261144, 'Websocket перестал работу')
             await asyncio.sleep(5)

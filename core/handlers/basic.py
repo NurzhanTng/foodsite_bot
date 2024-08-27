@@ -1,3 +1,4 @@
+import json
 import logging
 
 from aiogram import Bot, Router, F
@@ -42,11 +43,12 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             'telegram_fullname': message.from_user.full_name,
             'promo': promo
         }
+        logging.info(f"payload [auth/register/]: {json.dumps(payload)}")
         user = await rest.post(url=f'auth/register/', data=payload)
         if type(user) == type([]):
             payload = {
                 'telegram_id': str(message.chat.id),
-                'telegram_fullname': message.from_user.full_name,
+                'telegram_fullname': f"-telegram- {message.from_user.full_name}",
                 'promo': ''
             }
             user = await rest.post(url=f'auth/register/', data=payload)

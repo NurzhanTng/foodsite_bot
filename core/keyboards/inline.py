@@ -100,13 +100,13 @@ def get_change_order_type_inline_keyboard(order: Order):
     )
 
 
-def get_rating_inline_keyboard():
+def get_rating_inline_keyboard(order_id: int):
     keyboard_builder = InlineKeyboardBuilder()
 
-    keyboard_builder.button(text="😞", callback_data='rating-0')
-    keyboard_builder.button(text="😐", callback_data='rating-1')
-    keyboard_builder.button(text="🙂", callback_data='rating-2')
-    keyboard_builder.button(text="😊", callback_data='rating-3')
+    keyboard_builder.button(text="😞", callback_data=f'rating-0-{order_id}')
+    keyboard_builder.button(text="😐", callback_data=f'rating-1-{order_id}')
+    keyboard_builder.button(text="🙂", callback_data=f'rating-2-{order_id}')
+    keyboard_builder.button(text="😊", callback_data=f'rating-3-{order_id}')
 
     keyboard_builder.adjust(4)
 

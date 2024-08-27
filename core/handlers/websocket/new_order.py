@@ -6,23 +6,25 @@ from core.keyboards.inline import get_manager_order_inline_keyboard
 from core.utils.fetch_users import fetch_users
 
 
-async def send_new_order_to_role(company_id: int, order_id: int, bot: Bot, role: str):
+async def send_new_order_to_role(company_id: int, order_id: int, bot: Bot, role: str, message_history: ChatHistoryHandler):
     ids = await fetch_users(company_id, role)
+    print("ids: ", ids)
     for user_id in ids:
         try:
+            print('user_id: ', user_id)
             message_id = (await bot.send_message(int(user_id), f"Получен новый заказ {order_id}",
                                                  reply_markup=get_manager_order_inline_keyboard(order_id))).message_id
-            manager_history.add_new_message(f'{user_id}|{order_id}', message_id)
+            message_history.add_new_message(f'{user_id}|{order_id}', message_id)
         except Exception as e:
             logging.error(f"New order error [{role}]: {e}")
 
 
-async def new_order(bot: Bot, message_history: ChatHistoryHandler, manager_history: ChatHistoryHandler, order: Order):
+async def new_order(bot: Bot, message_history: ChatHistoryHandler, order: Order):
     try:
         message_id = (await bot.send_message(int(order.client_id), f"Ваш заказ сохранен\n")).message_id
         message_history.add_new_message(order.client_id, message_id)
-        await send_new_order_to_role(order.company_id, order.id, bot, 'manager')
-        await send_new_order_to_role(order.company_id, order.id, bot,  'admin')
+        await send_new_order_to_role(order.company_id, order.id, bot, 'manager', message_history)
+        await send_new_order_to_role(order.company_id, order.id, bot,  'admin', message_history)
     except Exception as e:
         logging.error(f"Error new_order: {e}")
 

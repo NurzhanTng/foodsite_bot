@@ -2,22 +2,24 @@ import logging
 from aiogram import Bot, Router, F
 from core.models.Order import Order
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
-from core.keyboards.inline import get_rating_inline_keyboard
+from core.keyboards.inline import get_rating_inline_keyboard, get_manager_order_inline_keyboard
 from core.utils.fetch_users import fetch_users
 
 
-async def send_new_order_to_role(company_id: int, order_id: int, bot: Bot, role: str):
+async def send_new_order_to_role(company_id: int, order_id: int, bot: Bot, role: str, message_history:
+                                 ChatHistoryHandler, send_reply_markup: bool = True):
     ids = await fetch_users(company_id, role)
     for user_id in ids:
         try:
+            reply = get_manager_order_inline_keyboard(order_id) if send_reply_markup else None
             message_id = (await bot.send_message(int(user_id), f"Получен новый заказ {order_id}",
-                                                 reply_markup=get_manager_order_inline_keyboard(order_id))).message_id
-            manager_history.add_new_message(f'{user_id}|{order_id}', message_id)
+                                                 reply_markup=reply)).message_id
+            message_history.add_new_message(f'{user_id}|{order_id}', message_id)
         except Exception as e:
             logging.error(f"New order error [{role}]: {e}")
 
 
-async def order_change(bot: Bot, message_history: ChatHistoryHandler, manager_history: ChatHistoryHandler,
+async def order_change(bot: Bot, message_history: ChatHistoryHandler,
                        order: Order):
     order_price = 0
     for product in order.products:
@@ -45,27 +47,39 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler, manager_hi
     }
     try:
         if order.status in ["payment_await", "active"]:
+            manager_ids = await fetch_users(order.company_id, 'admin')
+            for manager_id in manager_ids:
+                await message_history.delete_messages(f'{manager_id}|{order.id}', '|')
             manager_ids = await fetch_users(order.company_id, 'manager')
             for manager_id in manager_ids:
-                await manager_history.delete_messages(f'{manager_id}|{order.id}', '|')
+                await message_history.delete_messages(f'{manager_id}|{order.id}', '|')
+        if order.status in ["on_runner"]:
+            manager_ids = await fetch_users(order.company_id, 'cook')
+            for manager_id in manager_ids:
+                await message_history.delete_messages(f'{manager_id}|{order.id}', '|')
+        if order.status in ["inactive"]:
+            manager_ids = await fetch_users(order.company_id, 'runner')
+            for manager_id in manager_ids:
+                await message_history.delete_messages(f'{manager_id}|{order.id}', '|')
 
         if (order.status == "done" or
                 (order.status == "on_runner" and order.is_delivery) or
-                (order.status == "manager_await" and order.rejected_text)):
+                (order.status == "manager_await" and order.rejected_text != "")):
             return
         if order.status == "active":
-            await send_new_order_to_role(order.company_id, order.id, bot,  'cook')
+            await send_new_order_to_role(order.company_id, order.id, bot, 'cook', message_history, False)
         if order.status == "on_runner":
-            await send_new_order_to_role(order.company_id, order.id, bot, 'runner')
+            await send_new_order_to_role(order.company_id, order.id, bot, 'runner', message_history, False)
         if order.status == "on_delivery":
-            await send_new_order_to_role(order.company_id, order.id, bot,  'delivery')
-        if order.status == "inactive":
+            await send_new_order_to_role(order.company_id, order.id, bot, 'delivery', message_history, False)
+        if order.status == "inactive" and not isinstance(order.rating, int):
             await message_history.delete_messages(order.client_id)
             message_id = (await bot.send_message(int(order.client_id), text_by_status[
                 order.status])).message_id
             rating_id = (await bot.send_message(int(order.client_id), text_by_status['rating'],
-                                                reply_markup=get_rating_inline_keyboard())).message_id
+                                                reply_markup=get_rating_inline_keyboard(order.id))).message_id
             message_history.add_new_message(order.client_id, message_id)
+            print('websocket message rating: ', order.client_id, type(order.client_id))
             message_history.add_new_message(order.client_id, rating_id)
             return
         if order.status == "on_delivery":

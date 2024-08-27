@@ -12,15 +12,16 @@ rest = RestHandler()
 serializer = OrderSerializer()
 
 
-async def order_main(bot: Bot, message_history: ChatHistoryHandler, manager_history: ChatHistoryHandler,
+async def order_main(bot: Bot, message_history: ChatHistoryHandler,
                      request: OrderUpdate):
     try:
         order_dict = await rest.get(f'food/order/{request.order_id}')
         order = serializer.from_dict(order_dict)
+        print(order)
 
         if order.status == "manager_await":
-            await new_order(bot, message_history, manager_history, order)
+            await new_order(bot, message_history, order)
         else:
-            await order_change(bot, message_history, manager_history, order)
+            await order_change(bot, message_history, order)
     except Exception as e:
         logging.error(f"Error order_main: {e}")
