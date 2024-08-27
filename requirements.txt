@@ -1,4 +1,4 @@
-aiogram
+aiogram==3.12.0
 environs
 aiohttp
 geopy==2.4.1
