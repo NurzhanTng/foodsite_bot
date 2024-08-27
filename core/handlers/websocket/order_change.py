@@ -4,6 +4,9 @@ from core.models.Order import Order
 from core.utils.ChatHistoryHandler import ChatHistoryHandler
 from core.keyboards.inline import get_rating_inline_keyboard, get_manager_order_inline_keyboard
 from core.utils.fetch_users import fetch_users
+from core.utils.RestHandler import RestHandler
+
+rest = RestHandler()
 
 
 async def send_new_order_to_role(company_id: int, order_id: int, bot: Bot, role: str, message_history:
@@ -25,6 +28,16 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
     for product in order.products:
         order_price += product.price
 
+    address_text = ""
+    if order.status in ["on_runner", "done"]:
+        company: dict = await rest.get(f"service/company_spots/{order.company_id}")
+        company_name = company.get("name", "")
+        company_address = company.get("address", {}).get("parsed", "")
+        address_link = company.get("address_link", "")
+        address_text = (f'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: {company_name} '
+                        f'[{company_address}]({address_link})')
+        print("Address text: ", address_text)
+
     text_by_status = {
         # 'manager_await': 'Ваш заказ находится в обработке нашим менеджером. Благодарим за ожидание и понимание!',
         'manager_await': 'Благодарим за ваш заказ! Вам в скором времени будет отправлен платеж на каспи. После '
@@ -32,8 +45,7 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
         'payment_await': 'Благодарим за ваш заказ! Вам отправлен платеж на каспи. После '
                          'подтверждения платежа мы немедленно приступим к выполнению вашего заказа',
         'active': 'Мы подтвердили получение вашей оплаты. Приступили к подготовке вашего заказа',
-        'done': 'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: г.Алматы. ТРК Forum. Проспект '
-                'Сейфуллина, 617 / 3 этаж',
+        'done': address_text,
         'on_delivery': 'Ваш заказ готов и передан доставщику. Ожидайте доставки в ближайшее время',
         # 'inactive': f'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено '
         #             f'{(order_price - (int(order.bonus_amount) if order.bonus_used else 0)) // 20} бонусных баллов',
@@ -42,8 +54,7 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
         'rating': "Пожалуйста, выберите смайлик, который наилучшим образом описывает ваше впечатление от "
                   "заказа:\n\n😞 - Не понравилось\n😐 - Средне\n🙂 - Хорошо\n😊 - Отлично",
         'rejected': f"Ваш заказ был отклонен. Причина: *{order.rejected_text}*",
-        'on_runner': 'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: г.Алматы. ТРК Forum. Проспект '
-                     'Сейфуллина, 617 / 3 этаж'
+        'on_runner': address_text
     }
     try:
         if order.status in ["payment_await", "active"]:
@@ -61,7 +72,10 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
             manager_ids = await fetch_users(order.company_id, 'runner')
             for manager_id in manager_ids:
                 await message_history.delete_messages(f'{manager_id}|{order.id}', '|')
+    except Exception as e:
+        logging.error(f"Error [order_change (message delete)]: {e}")
 
+    try:
         if (order.status == "done" or
                 (order.status == "on_runner" and order.is_delivery) or
                 (order.status == "manager_await" and order.rejected_text != "")):
@@ -72,6 +86,10 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
             await send_new_order_to_role(order.company_id, order.id, bot, 'runner', message_history, False)
         if order.status == "on_delivery":
             await send_new_order_to_role(order.company_id, order.id, bot, 'delivery', message_history, False)
+    except Exception as e:
+        logging.error(f"Error [order_change (message send)]: {e}")
+
+    try:
         if order.status == "inactive" and not isinstance(order.rating, int):
             await message_history.delete_messages(order.client_id)
             message_id = (await bot.send_message(int(order.client_id), text_by_status[
@@ -99,6 +117,5 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
 
         message_id = (await bot.send_message(int(order.client_id), text_by_status[order.status])).message_id
         message_history.add_new_message(order.client_id, message_id)
-
     except Exception as e:
-        print(e)
+        logging.error(f"Error [order_change]: {e}")
