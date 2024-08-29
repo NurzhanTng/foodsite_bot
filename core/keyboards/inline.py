@@ -149,3 +149,14 @@ def get_manager_order_inline_keyboard(order_id: str | int):
     return keyboard_builder.as_markup(
         resize_keyboard=True
     )
+
+
+def get_mailing_inline_keyboard():
+    keyboard_builder = InlineKeyboardBuilder()
+
+    keyboard_builder.button(text='Получить акцию', web_app=WebAppInfo(url="https://kz.pizzeria-almaty.kz/redirect/"))
+    keyboard_builder.button(text='Пропустить', callback_data=f'mailing_cancel')
+
+    return keyboard_builder.as_markup(
+        resize_keyboard=True
+    )
