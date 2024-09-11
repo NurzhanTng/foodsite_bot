@@ -27,19 +27,25 @@ async def send_mailing(message: Message, bot: Bot, chat_handler: ChatHistoryHand
         logging.error(f"User {user.get('telegram_id', -1)} tried to send out a mailing")
         return
 
-    users = await rest.post('service/users_find/', data={"role": "admin"})
-    needed_ids = ["1618183152", "878852186", "804430069", "855106661", "452075811", "742501371", "734952244",
-                  "7083460631", "5472448283", "6497941056", "5874139243", "333591649", "5555863688", "5052456121",
-                  "929957030", "744215752", "1375037247", "5106374444", "195456138", "532300099", "771033809",
-                  "667278926", "792874867", "1615879151", "1120989491", "6771759035", "1493758385", "5316566417",
-                  "546121705", "938644744", "6002574127", "538232087"]
+    users = await rest.post('service/users_find/', data={"role": "client"})
+    # needed_ids = ["1618183152", "878852186", "804430069", "855106661", "452075811", "742501371", "734952244",
+    #               "7083460631", "5472448283", "6497941056", "5874139243", "333591649", "5555863688", "5052456121",
+    #               "929957030", "744215752", "1375037247", "5106374444", "195456138", "532300099", "771033809",
+    #               "667278926", "792874867", "1615879151", "1120989491", "6771759035", "1493758385", "5316566417",
+    #               "546121705", "938644744", "6002574127", "538232087"]
     await message.answer(f'Рассылка началась. Количество пользователей для рассылки: {len(users)}')
     error_users = {}
+    not_sent_ids = []
     for user in users:
         chat_id = user.get('telegram_id', -1)
+        token = user.get('promo', None)
         try:
+            if not (token is None):
+                not_sent_ids.append(chat_id)
+                continue
             message_id = (await bot.send_photo(chat_id,
-                                               "https://ucarecdn.com/6d35201e-acc6-46e9-b13c-c53d3d0d170d/-/format/auto/-/preview/3000x3000/-/quality/lighter/pf-dfc945db--50sale.png")
+                                               "https://ucarecdn.com/6d35201e-acc6-46e9-b13c-c53d3d0d170d/-/format"
+                                               "/auto/-/preview/3000x3000/-/quality/lighter/pf-dfc945db--50sale.png")
                           ).message_id
             chat_handler.add_new_message(chat_id, message_id)
             message_id = (await bot.send_message(chat_id,
@@ -58,8 +64,9 @@ async def send_mailing(message: Message, bot: Bot, chat_handler: ChatHistoryHand
                             f"в функции {e.__traceback__.tb_frame.f_code.co_name})"
             }
     await message.answer(f'Рассылка закончилась. Успешно отправленные '
-                         f'сообщения [{len(users) - len(error_users)}/{len(users)}]')
-    logging.info(f'Рассылка: {error_users}')
+                         f'сообщения [{len(users) - len(error_users) - len(not_sent_ids)}/{len(users)}]')
+    logging.info(f'Рассылка [error]: {error_users}')
+    logging.info(f'Рассылка [continue]: {not_sent_ids}')
 
 
 @router.callback_query(F.data == "mailing_cancel")
