@@ -30,13 +30,18 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
 
     address_text = ""
     if order.status in ["on_runner", "done"]:
-        company: dict = await rest.get(f"service/company_spots/{order.company_id}")
+        company: dict = await rest.get(f"service/company_spots/{order.company_id}/")
         company_name = company.get("name", "")
         company_address = company.get("address", {}).get("parsed", "")
         address_link = company.get("address_link", "")
         address_text = f'Ваш заказ готов к выдаче! Пожалуйста, заберите его по адресу: {company_name} ' + \
                        f'[{company_address}]({address_link})'
         print("Address text: ", address_text)
+
+    bonus_amount = 0
+    if order.status == 'inactive':
+        response: dict = await rest.get(f"food/order_bonus/{order.id}/")
+        bonus_amount = response.get("bonus_amount", 0)
 
     text_by_status = {
         # 'manager_await': 'Ваш заказ находится в обработке нашим менеджером. Благодарим за ожидание и понимание!',
@@ -49,8 +54,7 @@ async def order_change(bot: Bot, message_history: ChatHistoryHandler,
         'on_delivery': 'Ваш заказ готов и передан доставщику. Ожидайте доставки в ближайшее время',
         # 'inactive': f'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено '
         #             f'{(order_price - (int(order.bonus_amount) if order.bonus_used else 0)) // 20} бонусных баллов',
-        'inactive': f'Ваш заказ выполнен успешно! Мы рады сообщить, что на ваш счет было добавлено '
-                    f'1000 бонусных баллов',
+        'inactive': f'Ваш заказ выполнен успешно! {f"Мы рады сообщить, что на ваш счет было добавлено {bonus_amount} бонусных баллов" if bonus_amount != 0 else "" }',
         'rating': "Пожалуйста, выберите смайлик, который наилучшим образом описывает ваше впечатление от "
                   "заказа:\n\n😞 - Не понравилось\n😐 - Средне\n🙂 - Хорошо\n😊 - Отлично",
         'rejected': f"Ваш заказ был отклонен. Причина: *{order.rejected_text}*",
