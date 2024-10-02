@@ -4,3 +4,4 @@ aiohttp
 geopy==2.4.1
 websockets
 apscheduler
+cryptography
