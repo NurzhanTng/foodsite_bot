@@ -18,10 +18,13 @@ router = Router()
 @router.message(Command(commands=['start', 'run']))
 async def _get_start(message: Message, command: CommandObject, chat_handler: ChatHistoryHandler, rest: RestHandler,
                      state: FSMContext):
-    await message.answer('Добро пожаловать в нашего телеграм бота для заказа еды 🎉\n\n'
-                         'Бот предлагает удобное меню, заказы и отслеживание статуса. \n'
-                         'Получайте уведомления об акциях и бонусах в боте!')
-    await get_start(message, chat_handler, rest, state, command)
+    try:
+        await message.answer('Добро пожаловать в нашего телеграм бота для заказа еды 🎉\n\n'
+                             'Бот предлагает удобное меню, заказы и отслеживание статуса. \n'
+                             'Получайте уведомления об акциях и бонусах в боте!')
+        await get_start(message, chat_handler, rest, state, command)
+    except Exception as e:
+        logging.error(f"_get_start error: {e}")
 
 
 # @router.message(Command(commands=['test']))
@@ -38,13 +41,32 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         if command is not None:
             promo = command.args
 
+        logging.info(f"1")
+
+        if promo.startswith("---"):
+            try:
+                order_id = int(promo.replace("-", ""))
+                await rest.update(url=f'food/orders/{order_id}/', data={ "client_id": str(message.chat.id) })
+            except ValueError as e:
+                logging.error(f"Terminal assign error: {e}")
+            promo = ""
+
+        logging.info(f"2")
+
         payload = {
             'telegram_id': str(message.chat.id),
             'telegram_fullname': message.from_user.full_name,
             'promo': promo
         }
+
+        logging.info(f"3")
+
         logging.info(f"payload [auth/register/]: {json.dumps(payload)}")
+
+        logging.info(f"4")
+
         user = await rest.post(url=f'auth/register/', data=payload)
+        logging.info(f"5")
         if type(user) == type([]):
             payload = {
                 'telegram_id': str(message.chat.id),
@@ -53,7 +75,9 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
             }
             user = await rest.post(url=f'auth/register/', data=payload)
 
+        logging.info(f"6")
         await state.update_data(user=user)
+        logging.info(f"7")
         if user["role"] == "admin":
             await chat_handler.send_message(message,
                                             f"*🏠 Вы находитесь на главной странице админа компании*\n"
@@ -92,8 +116,9 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
                                             "*🏠 Вы находитесь на главной странице доставщика*\n"
                                             f"_Чтобы увидеть заказы, воспользуйтесь кнопками_",
                                             reply_markup=get_delivery_reply_keyboard())
+        logging.info(f"8")
     except Exception as e:
-        print(e)
+        print(f"Main function error: {e}")
 
 
 @router.message(lambda message: not message.web_app_data)
