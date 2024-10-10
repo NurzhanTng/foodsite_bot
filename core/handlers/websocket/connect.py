@@ -5,8 +5,9 @@ import json
 from aiogram import Bot
 from core.middlewares.DeleteMessagesMiddleware import DeleteMessagesMiddleware
 from core.handlers.websocket.order_main import order_main
-from core.models.websocket.OrderUpdate import OrderUpdateSerializer, OrderUpdate
-from core.utils.ChatHistoryHandler import ChatHistoryHandler
+from core.models.websocket.OrderUpdate import OrderUpdateSerializer
+
+from core.settings import settings
 
 
 async def connect(bot: Bot, delete_middleware: DeleteMessagesMiddleware):
@@ -14,7 +15,7 @@ async def connect(bot: Bot, delete_middleware: DeleteMessagesMiddleware):
 
     while True:
         try:
-            async with websockets.connect("wss://pizza.pizzeria-almaty.kz:443/ws/orders/") as websocket:
+            async with websockets.connect(f"{settings.bots.ws_path}orders/") as websocket:
                 logging.info("websocket started")
                 while True:
                     try:

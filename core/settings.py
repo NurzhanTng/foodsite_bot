@@ -10,6 +10,7 @@ class Bots:
     api_path: str
     site_path: str
     temporary_path: str
+    ws_path: str
 
 
 @dataclass
@@ -28,7 +29,8 @@ def get_settings(path: str):
             api_path=env.str("API_PATH"),
             site_path=env.str("SITE_PATH"),
             payments_token=env.str("PAYMENTS_TOKEN"),
-            temporary_path=env.str("TEMPORARY_PATH")
+            temporary_path=env.str("TEMPORARY_PATH"),
+            ws_path=env.str("WS_PATH"),
         )
     )
 
