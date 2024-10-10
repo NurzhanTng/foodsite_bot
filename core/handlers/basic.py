@@ -41,17 +41,17 @@ async def get_start(message: Message, chat_handler: ChatHistoryHandler, rest: Re
         if command is not None:
             promo = command.args
 
+            if promo.startswith("---"):
+                try:
+                    logging.info(promo.replace("-", ""))
+                    logging.info(int(promo.replace("-", "")))
+                    order_id = int(promo.replace("-", ""))
+                    await rest.update(url=f'food/orders/{order_id}/', data={ "client_id": str(message.chat.id) })
+                except ValueError as e:
+                    logging.error(f"Terminal assign error: {e}")
+                promo = ""
+
         logging.info(f"1")
-
-        if promo.startswith("---"):
-            try:
-                order_id = int(promo.replace("-", ""))
-                await rest.update(url=f'food/orders/{order_id}/', data={ "client_id": str(message.chat.id) })
-            except ValueError as e:
-                logging.error(f"Terminal assign error: {e}")
-            promo = ""
-
-        logging.info(f"2")
 
         payload = {
             'telegram_id': str(message.chat.id),
